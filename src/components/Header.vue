@@ -1,24 +1,35 @@
 <template>
-  <menu>
-    <a href="/">Accueil</a>
-    <div class="header-separateur"></div>
-    <a href="/catalogue">Catalogue</a>
-    <div class="header-separateur"></div>
+  <v-app-bar :elevation="2" rounded app dark style="background-color: #ff69b4">
+    <v-app-bar-nav-icon></v-app-bar-nav-icon>
+    <v-toolbar-title>Rich Ricasso</v-toolbar-title>
 
-    <a href="/profil">Profil</a>
-    <div class="header-separateur"></div>
-    <a href="/panier"
-      ><img src="./images/chariot-de-chariot.png" alt="" style="width: 36px"
-    /></a>
-    <div class="header-separateur"></div>
-    <a href="deconnexion.php">Déconnexion</a>
-    <a href="/inscription">S'identifier</a>
-  </menu>
+    <v-spacer></v-spacer>
+
+    <v-btn to="/">Accueil</v-btn>
+    <v-btn to="/catalogue">Catalogue</v-btn>
+
+    <v-btn v-if="isLoggedIn" to="/profil">Profil</v-btn>
+    <v-btn v-if="isLoggedIn" to="/panier">Panier</v-btn>
+    <v-btn v-if="isLoggedIn" to="/deconnexion">Déconnexion</v-btn>
+
+    <v-btn v-if="!isLoggedIn" to="/inscription">Identification</v-btn>
+  </v-app-bar>
 </template>
 
-<script></script>
+<script>
+export default {
+  data() {
+    return {
+      isLoggedIn: false,
+    };
+  },
+  created() {
+    this.isLoggedIn = sessionStorage.getItem("auth_token") !== null;
+  },
+};
+</script>
 
-<style>
+<style scoped>
 header {
   text-align: center;
   display: flex;
