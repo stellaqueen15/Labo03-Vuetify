@@ -1,33 +1,75 @@
 <template>
-  <div class="fenetre-connexion">
-    <div class="barre-connexion">
-      <span class="titre-fenetre-connexion">Fenêtre Connexion</span>
-      <div class="boutons-fenetre-connexion">
-        <span class="moins">-</span>
-        <span class="ouvrir">[ ]</span>
-        <span class="fermer">X</span>
-      </div>
-    </div>
-    <div class="contenu-connexion">
-      <div class="bloc-connexion">
-        <h2>Connexion</h2>
-        <form action="" method="post">
-          <label>Email</label><br />
-          <input type="email" id="email" name="email" required /><br /><br />
-          <label>Mot de passe</label><br />
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-          /><br /><br />
-          <input type="submit" value="Se connecter" class="sora-font" />
-        </form>
-        <a href="/inscription">S'inscrire</a>
-      </div>
-    </div>
-  </div>
+  <v-container>
+    <v-row justify="center" align="center" class="pa-4">
+      <v-col cols="12" md="6">
+        <!-- Fenêtre de connexion -->
+        <v-card>
+          <v-card-title class="text-h5">Connexion</v-card-title>
+
+          <!-- Formulaire -->
+          <v-form @submit.prevent="handleLogin">
+            <v-text-field
+              label="Email"
+              v-model="email"
+              type="email"
+              required
+              outlined
+            ></v-text-field>
+
+            <v-text-field
+              label="Mot de passe"
+              v-model="password"
+              type="password"
+              required
+              outlined
+            ></v-text-field>
+
+            <v-btn type="submit" color="primary" block> Se connecter </v-btn>
+          </v-form>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      email: "",
+      password: "",
+    };
+  },
+  methods: {
+    // Fonction pour envoyer la requête de connexion
+    handleLogin() {
+      fetch("/Labo03/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Nous envoyons les données en JSON
+        },
+        body: JSON.stringify({
+          email: this.email,
+          password: this.password,
+        }),
+      })
+        .then((response) => response.json()) // Transforme la réponse en JSON
+        .then((data) => {
+          if (data.success) {
+            localStorage.setItem("user_id", data.user.id); // Enregistrer un ID utilisateur par exemple
+            this.$router.push("/dashboard"); // Rediriger vers une page après connexion
+          } else {
+            alert(data.message); // Afficher un message d'erreur si la connexion échoue
+          }
+        })
+        .catch((error) => {
+          console.error("Erreur de connexion:", error);
+          alert("Une erreur est survenue. Veuillez réessayer.");
+        });
+    },
+  },
+};
+</script>
 
 <style>
 .contenu-connexion {

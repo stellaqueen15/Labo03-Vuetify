@@ -1,4 +1,15 @@
 <?php
+// Toujours mettre ces en-têtes en haut du fichier, avant toute autre sortie
+header("Access-Control-Allow-Origin: http://localhost:4208");  // Permet au frontend d'accéder à l'API
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");  // Permet les méthodes HTTP spécifiées
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");  // Permet les en-têtes utilisés par les requêtes
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    // Répond à la requête OPTIONS avec un statut 200
+    header('HTTP/1.1 200 OK');
+    exit(0);  // Fin de la requête OPTIONS
+}
+
 require_once '../UserController.php';
 require_once '../ProductController.php';
 require_once '../UserView.php';
@@ -136,6 +147,16 @@ if ($method == 'GET' && $uri == '/Labo03/api/infolettre/status') {
 
 //PUT pour modifier un utilisateur
 if ($method == 'PUT' && preg_match('/^\/Labo03\/api\/user\/(\d+)$/', $uri, $matches)) {
+
+    if (!isset($_SESSION['email'])) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Utilisateur non connecté.',
+        ]);
+        exit();
+    }
+
     $userId = $matches[1];
 
     $data = json_decode(file_get_contents('php://input'), true);
@@ -182,6 +203,16 @@ if ($method == 'PUT' && preg_match('/^\/Labo03\/api\/user\/(\d+)$/', $uri, $matc
 
 // DELETE pour supprimer un utilisateur
 if ($method == 'DELETE' && preg_match('/^\/Labo03\/api\/user\/(\d+)$/', $uri, $matches)) {
+
+    if (!isset($_SESSION['email'])) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Utilisateur non connecté.',
+        ]);
+        exit();
+    }
+
     $userId = $matches[1];
     if ($userController->deleteUser($userId)) {
         echo json_encode(['success' => true, 'message' => 'Utilisateur supprimé']);
@@ -193,6 +224,16 @@ if ($method == 'DELETE' && preg_match('/^\/Labo03\/api\/user\/(\d+)$/', $uri, $m
 
 // POST pour se déconnecter
 if ($method === 'POST' && $uri === '/Labo03/api/deconnexion') {
+
+    if (!isset($_SESSION['email'])) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Utilisateur non connecté.',
+        ]);
+        exit();
+    }
+
     session_unset();
     session_destroy();
 
@@ -203,17 +244,75 @@ if ($method === 'POST' && $uri === '/Labo03/api/deconnexion') {
     exit();
 }
 
-// POST pour ajouter un utilisateur
 if ($method == 'POST' && $uri == '/Labo03/api/user') {
     $data = json_decode(file_get_contents('php://input'), true);
+
+    // Vérification si les données ont été correctement envoyées
+    if (!$data) {
+        echo json_encode(['success' => false, 'message' => 'Aucune donnée reçue ou format incorrect']);
+        exit();
+    }
+
+    // Traitement de l'inscription
     $name = sanitizeString($data['name']);
     $email = sanitizeString($data['email']);
     $password = password_hash(sanitizeString($data['password']), PASSWORD_DEFAULT);
+
+    // Vérification et ajout de l'utilisateur
     if ($userController->createUser($name, $email, $password)) {
         echo json_encode(['success' => true, 'message' => 'Utilisateur ajouté']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Erreur d\'ajout']);
     }
+    exit();
+}
+
+
+// POST pour la connexion de l'utilisateur
+if ($method == 'POST' && $uri == '/Labo03/api/login') {
+    header('Content-Type: application/json');
+
+    // Récupérer les données envoyées en POST
+    $data = json_decode(file_get_contents('php://input'));
+
+    $email = $data->email ?? '';
+    $password = $data->password ?? '';
+
+    if (!$email || !$password) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Email et mot de passe sont requis.']);
+        exit();
+    }
+
+    // Rechercher l'utilisateur dans la base de données
+    $user = $database->prepare('SELECT * FROM users WHERE email = ?');
+    $user->execute([$email]);
+    $userData = $user->fetch();
+
+    if ($userData) {
+        // Vérifier si le mot de passe est correct
+        if (password_verify($password, $userData['password'])) {
+            // Si la connexion est réussie, démarrer la session et stocker les informations de l'utilisateur
+            session_start();
+            $_SESSION['user_id'] = $userData['id'];
+            $_SESSION['email'] = $userData['email'];
+
+            echo json_encode([
+                'message' => 'Connexion réussie.',
+                'user' => [
+                    'id' => $userData['id'],
+                    'email' => $userData['email'],
+                ]
+            ]);
+        } else {
+            http_response_code(401);
+            echo json_encode(['message' => 'Mot de passe incorrect.']);
+        }
+    } else {
+        http_response_code(404);
+        echo json_encode(['message' => 'Utilisateur non trouvé.']);
+    }
+
     exit();
 }
 

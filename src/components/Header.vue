@@ -8,11 +8,16 @@
     <v-btn to="/">Accueil</v-btn>
     <v-btn to="/catalogue">Catalogue</v-btn>
 
+    <!-- Affichage des liens uniquement si l'utilisateur est connecté -->
     <v-btn v-if="isLoggedIn" to="/profil">Profil</v-btn>
     <v-btn v-if="isLoggedIn" to="/panier">Panier</v-btn>
-    <v-btn v-if="isLoggedIn" to="/deconnexion">Déconnexion</v-btn>
+    <v-btn v-if="isLoggedIn" to="/deconnexion" @click="logout"
+      >Déconnexion</v-btn
+    >
 
-    <v-btn v-if="!isLoggedIn" to="/inscription">Identification</v-btn>
+    <!-- Affichage des liens uniquement si l'utilisateur n'est pas connecté -->
+    <v-btn v-if="!isLoggedIn" to="/connexion">Connexion</v-btn>
+    <v-btn v-if="!isLoggedIn" to="/inscription">Inscription</v-btn>
   </v-app-bar>
 </template>
 
@@ -24,7 +29,31 @@ export default {
     };
   },
   created() {
-    this.isLoggedIn = sessionStorage.getItem("auth_token") !== null;
+    // Vérifier l'état de connexion de l'utilisateur via l'API profil
+    this.checkLoginStatus();
+  },
+  methods: {
+    async checkLoginStatus() {
+      try {
+        // Effectuer une requête GET vers l'API pour vérifier si l'utilisateur est connecté
+        const response = await this.$axios.get("/Labo03/api/user/profil");
+
+        if (response.data.success) {
+          this.isLoggedIn = true;
+        } else {
+          this.isLoggedIn = false;
+        }
+      } catch (error) {
+        // En cas d'erreur (par exemple si l'utilisateur n'est pas connecté), on le considère comme déconnecté
+        this.isLoggedIn = false;
+      }
+    },
+    logout() {
+      // Déconnexion: on supprime le token du sessionStorage
+      sessionStorage.removeItem("auth_token");
+      this.isLoggedIn = false;
+      this.$router.push("/"); // Rediriger vers la page d'accueil
+    },
   },
 };
 </script>

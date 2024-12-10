@@ -1,35 +1,91 @@
 <template>
-  <div class="fenetre-connexion">
-    <div class="barre-connexion">
-      <span class="titre-fenetre-connexion">Fenêtre Inscription</span>
-      <div class="boutons-fenetre-connexion">
-        <span class="moins">-</span>
-        <span class="ouvrir">[ ]</span>
-        <span class="fermer">X</span>
-      </div>
-    </div>
-    <div class="contenu-connexion">
-      <div class="bloc-connexion">
-        <h2>Inscription</h2>
-        <form action="" method="post">
-          <label>Nom</label><br />
-          <input type="text" id="nom" name="nom" required /><br /><br />
-          <label>Email</label><br />
-          <input type="email" id="email" name="email" required /><br /><br />
-          <label>Mot de passe</label><br />
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-          /><br /><br />
-          <input type="submit" value="S'inscrire" />
-        </form>
-        <a href="/connexion" class="connecter">Se connecter</a>
-      </div>
-    </div>
-  </div>
+  <v-container>
+    <v-row justify="center" align="center" class="pa-4">
+      <v-col cols="12" md="6">
+        <!-- Fenêtre d'inscription -->
+        <v-card>
+          <v-card-title class="text-h5">Inscription</v-card-title>
+
+          <!-- Formulaire d'inscription -->
+          <v-form @submit.prevent="handleSignup">
+            <v-text-field
+              label="Nom"
+              v-model="name"
+              required
+              outlined
+            ></v-text-field>
+
+            <v-text-field
+              label="Email"
+              v-model="email"
+              type="email"
+              required
+              outlined
+            ></v-text-field>
+
+            <v-text-field
+              label="Mot de passe"
+              v-model="password"
+              type="password"
+              required
+              outlined
+            ></v-text-field>
+
+            <v-btn type="submit" color="primary" block> S'inscrire </v-btn>
+          </v-form>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      name: "",
+      email: "",
+      password: "",
+    };
+  },
+  methods: {
+    handleSignup() {
+      fetch("http://localhost:4208/Labo03/api/user", {
+        method: "POST", // Méthode POST
+        headers: {
+          "Content-Type": "application/json", // Nous envoyons du JSON
+        },
+        body: JSON.stringify({
+          name: this.name, // Données envoyées
+          email: this.email,
+          password: this.password,
+        }),
+        mode: "cors", // Ajout du mode CORS pour explicitement activer les en-têtes CORS
+      })
+        .then((response) => {
+          console.log("Réponse du serveur:", response); // Ajoute ceci pour voir la réponse
+          if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+          }
+          return response.json(); // Traite la réponse JSON
+        })
+        .then((data) => {
+          console.log(data); // Affiche la réponse du serveur
+          if (data.success) {
+            alert("Inscription réussie !");
+            this.$router.push("/connexion");
+          } else {
+            alert(data.message); // Affiche un message d'erreur détaillé
+          }
+        })
+        .catch((error) => {
+          console.error("Erreur lors de l'inscription:", error); // Affiche l'erreur dans la console
+          alert("Une erreur est survenue. Veuillez réessayer.");
+        });
+    },
+  },
+};
+</script>
 
 <style>
 .contenu-connexion {
