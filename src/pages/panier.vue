@@ -1,112 +1,104 @@
+panier.vue :
 <template>
-  <div class="fenetre">
-    <div class="barre">
-      <span class="titre-fenetre">Panier</span>
-      <div class="boutons-fenetre">
-        <span class="moins">-</span>
-        <span class="ouvrir">[ ]</span>
-        <span class="fermer">X</span>
-      </div>
-    </div>
-    <div>
-      <ul class="liste-panier">
-        <!-- Affiche les produits dans le panier -->
-        <li v-for="(item, index) in cart" :key="index">
-          <div class="fenetre-panier">
-            <div class="barre-panier">
-              <span class="titre-fenetre">{{ item.name }}</span>
-              <div class="boutons-fenetre-panier">
-                <span class="moins">-</span>
-                <span class="ouvrir">[ ]</span>
-                <button @click="removeFromCart(item.id)" class="fermer">X</button>
-              </div>
-            </div>
-            <div class="conteneur">
-              <img :src="item.image" :alt="item.name" width="150" />
-              <p>{{ item.prix.toFixed(2) }} €</p>
-            </div>
-          </div>
-        </li>
-      </ul>
-      <div class="conteneur-panier">
-        <p class="prix-total">Total : {{ total.toFixed(2) }} €</p>
-        <button class="boutonValiderPanier" @click="validateCart">
-          Valider le Panier
-        </button>
-      </div>
-      <p v-if="cart.length === 0">Votre panier est vide.</p>
-    </div>
-  </div>
+  <v-container>
+    <v-card class="fenetre">
+      <v-card-title class="barre">
+        <span class="titre-fenetre">Panier</span>
+        <v-spacer></v-spacer>
+        <v-btn icon small class="moins">
+          <v-icon>-</v-icon>
+        </v-btn>
+        <v-btn icon small class="ouvrir">
+          <v-icon>[ ]</v-icon>
+        </v-btn>
+        <v-btn icon small class="fermer">
+          <v-icon>X</v-icon>
+        </v-btn>
+      </v-card-title>
+
+      <v-card-text>
+        <v-list class="liste-panier">
+          <v-list-item
+            v-for="(item, index) in cart"
+            :key="index"
+            class="fenetre-panier"
+          >
+            <v-card class="barre-panier">
+              <v-card-title>{{ item.name }}</v-card-title>
+              <v-card-actions class="boutons-fenetre-panier">
+                <v-btn icon small class="moins">
+                  <v-icon>-</v-icon>
+                </v-btn>
+                <v-btn icon small class="ouvrir">
+                  <v-icon>[ ]</v-icon>
+                </v-btn>
+                <v-btn icon small @click="removeItem(index)" class="fermer">
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+
+            <v-row class="conteneur">
+              <v-col cols="4">
+                <v-img :src="item.image" :alt="item.name" width="150"></v-img>
+              </v-col>
+              <v-col cols="8">
+                <p>{{ parseFloat(item.prix).toFixed(2) }} €</p>
+              </v-col>
+            </v-row>
+          </v-list-item>
+        </v-list>
+
+        <v-card-actions class="conteneur-panier">
+          <v-card-text class="prix-total"
+            >Total : {{ total.toFixed(2) }} €</v-card-text
+          >
+          <v-btn
+            color="primary"
+            class="boutonValiderPanier"
+            @click="validateCart"
+          >
+            Valider le Panier
+          </v-btn>
+        </v-card-actions>
+
+        <v-card-text v-if="cart.length === 0" class="loading">
+          Votre panier est vide.
+        </v-card-text>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from "vue";
+import { useAppStore } from "@/stores/app";
 
-// État du panier
-const cart = ref([]);
+const store = useAppStore();
 
-// Récupérer les données depuis l'API
-fetch('/Labo03/api/produits')
-  .then(response => response.json())
-  .then(data => {
-    cart.value = data;
-  })
-  .catch(error => {
-    console.error('Erreur lors du chargement des produits :', error);
-  });
+const cart = computed(() => store.panier);
 
-// Calculer le total
 const total = computed(() =>
   cart.value.reduce((sum, item) => sum + parseFloat(item.prix), 0)
 );
 
-// Supprimer un produit du panier
-const removeFromCart = id => {
-  fetch(`/Labo03/api/produit/${id}`, {
-    method: 'DELETE',
-  })
-    .then(response => response.json())
-    .then(result => {
-      if (result.success) {
-        cart.value = cart.value.filter(item => item.id !== id);
-      } else {
-        console.error('Erreur lors de la suppression du produit :', result.message);
-      }
-    });
+const removeItem = (index) => {
+  store.removeFromCart(index);
 };
 
-// Valider le panier
 const validateCart = () => {
-  fetch('/Labo03/api/commande/status?success=1', {
-    method: 'GET',
-  })
-    .then(response => response.json())
-    .then(result => {
-      if (result.success) {
-        alert(result.message);
-        cart.value = []; // Vider le panier après validation
-      } else {
-        alert(result.message);
-      }
-    });
+  store.clearCart();
+  alert("Votre commande a été validée.");
 };
 </script>
 
-<style>
+<style scoped>
 .liste-panier {
   list-style: none;
-  margin-left: -41px;
+  margin-left: 0;
 }
 
 .fenetre-panier {
-  width: 900px;
-  border: 2px solid black;
-  background: linear-gradient(
-    360deg,
-    rgb(255, 113, 206) 0%,
-    rgb(214, 94, 241) 100%
-  );
-  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
   margin: 20px auto;
 }
 
@@ -120,65 +112,17 @@ const validateCart = () => {
   font-weight: bold;
 }
 
-.boutons-fenetre {
-  display: flex;
-  gap: 10px;
-}
-
-.boutons-fenetre-panier span {
+.boutons-fenetre-panier .v-btn {
   cursor: pointer;
-  background-color: rgb(1, 205, 254);
-  color: rgb(0, 0, 0);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.boutons-fenetre-panier span:hover {
-  background-color: rgb(74, 217, 253);
-}
-
-.boutons-fenetre-panier button {
-  cursor: pointer;
-  background-color: rgb(1, 205, 254);
-  color: rgb(0, 0, 0);
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: none;
-  height: 21px;
-  font-weight: 600;
-}
-
-.boutons-fenetre-panier button:hover {
-  background-color: rgb(74, 217, 253);
 }
 
 .prix-total {
-  background-color: rgb(141, 28, 186);
-  padding: 5px;
   text-align: center;
-  color: white;
   font-weight: 600;
 }
 
 .boutonValiderPanier {
-  background: linear-gradient(
-    -90deg,
-    rgb(1, 205, 254) 0%,
-    rgb(145, 233, 255) 100%
-  );
-  font-size: 16px;
-  border: 2px solid black;
-  padding: 10px;
-  cursor: pointer;
-  margin-bottom: 10px;
-}
-
-.boutonValiderPanier:hover {
-  background: linear-gradient(
-    -90deg,
-    rgb(10, 180, 223) 0%,
-    rgb(99, 193, 217) 100%
-  );
+  margin-top: 10px;
 }
 
 .conteneur {
@@ -190,6 +134,9 @@ const validateCart = () => {
   margin-left: 10px;
 }
 
-.conteneur-panier {
+.loading {
   text-align: center;
-}</style>
+  font-size: 1.5em;
+  color: #6200ea;
+}
+</style>

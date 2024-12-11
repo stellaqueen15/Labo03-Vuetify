@@ -1,29 +1,8 @@
-<template>
-  <v-app-bar :elevation="2" rounded app dark style="background-color: #ff69b4">
-    <v-app-bar-nav-icon></v-app-bar-nav-icon>
-    <v-toolbar-title>Rich Ricasso</v-toolbar-title>
-
-    <v-spacer></v-spacer>
-
-    <v-btn to="/">Accueil</v-btn>
-    <v-btn to="/catalogue">Catalogue</v-btn>
-
-    <!-- Affichage des liens uniquement si l'utilisateur est connecté -->
-    <v-btn v-if="isLoggedIn" to="/profil">Profil</v-btn>
-    <v-btn v-if="isLoggedIn" to="/panier">Panier</v-btn>
-    <v-btn v-if="isLoggedIn" to="/deconnexion">Déconnexion</v-btn>
-
-    <!-- Affichage des liens uniquement si l'utilisateur n'est pas connecté -->
-    <v-btn v-if="!isLoggedIn" to="/connexion">Connexion</v-btn>
-    <v-btn v-if="!isLoggedIn" to="/inscription">Inscription</v-btn>
-  </v-app-bar>
-</template>
-
 <script>
 export default {
   data() {
     return {
-      isLoggedIn: false, // État de la connexion
+      isLoggedIn: false,
     };
   },
   created() {
@@ -37,25 +16,60 @@ export default {
           "Content-Type": "application/json",
         },
       })
-        .then((response) => response.json()) // Parser la réponse en JSON
+        .then((response) => response.json())
         .then((data) => {
-          if (data.loggedIn) {
-            this.isLoggedIn = true; // L'utilisateur est connecté
-          } else {
-            this.isLoggedIn = false; // L'utilisateur n'est pas connecté
-          }
+          this.isLoggedIn = data.loggedIn || false;
         })
         .catch((error) => {
           console.error("Erreur de connexion:", error);
-          this.isLoggedIn = false; // En cas d'erreur, on assume que l'utilisateur n'est pas connecté
+          this.isLoggedIn = false;
+        });
+    },
+    logout() {
+      fetch("/Labo03/api/deconnexion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            this.isLoggedIn = false;
+            this.$router.push("/connexion");
+          } else {
+            console.error("Erreur lors de la déconnexion:", data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Erreur réseau lors de la déconnexion:", error);
         });
     },
   },
 };
 </script>
 
+<template>
+  <v-app-bar :elevation="2" rounded app dark class="menu">
+    <v-app-bar-nav-icon></v-app-bar-nav-icon>
+    <v-toolbar-title>Rich Ricasso</v-toolbar-title>
+
+    <v-spacer></v-spacer>
+
+    <v-btn to="/">Accueil</v-btn>
+    <v-btn to="/catalogue">Catalogue</v-btn>
+
+    <v-btn v-if="isLoggedIn" to="/profil">Profil</v-btn>
+    <v-btn v-if="isLoggedIn" to="/panier">Panier</v-btn>
+    <v-btn v-if="isLoggedIn" @click="logout">Déconnexion</v-btn>
+
+    <v-btn v-if="!isLoggedIn" to="/connexion">Connexion</v-btn>
+    <v-btn v-if="!isLoggedIn" to="/inscription">Inscription</v-btn>
+  </v-app-bar>
+</template>
+
 <style scoped>
-header {
+.v-app-bar.header {
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -63,7 +77,7 @@ header {
   justify-content: center;
 }
 
-menu {
+.v-app-bar.menu {
   height: 50px;
   background: linear-gradient(-90deg, rgb(1, 205, 254), rgb(175, 233, 255));
   width: 700px;
@@ -78,7 +92,7 @@ menu {
   border: 2px solid black;
 }
 
-menu > a {
+.menu > a {
   text-decoration: none;
   display: flex;
   justify-content: center;
@@ -94,11 +108,5 @@ menu > a {
 
 menu > a:hover {
   color: rgb(2, 100, 124);
-}
-
-.header-separateur {
-  width: 2px;
-  height: 35px;
-  background-color: rgba(0, 0, 0, 0.152);
 }
 </style>

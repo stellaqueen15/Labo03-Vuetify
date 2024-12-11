@@ -88,6 +88,22 @@ const customRoutes = [
       },
     ],
   },
+  {
+    path: "/Labo03/product_detail/:id",
+    component: () => import("@/layouts/default.vue"),
+    children: [
+      {
+        path: "",
+        name: "ProductDetail",
+        component: () => import("@/pages/productDetail.vue"),
+        props: true, // Passe automatiquement l'ID en tant que prop au composant
+      },
+    ],
+  },
+  {
+    path: "/:pathMatch(.)", // Route par défaut pour gérer les URL non trouvées
+    redirect: "/catalogue",
+  },
 ];
 
 // Merge automatic routes and custom routes

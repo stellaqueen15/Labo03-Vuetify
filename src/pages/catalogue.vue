@@ -1,152 +1,191 @@
 <template>
-  <div class="fenetre">
-    <div class="barre">
-      <span class="titre-fenetre">Fenêtre Catalogue</span>
-      <div class="boutons-fenetre">
-        <span class="moins">-</span>
-        <span class="ouvrir">[ ]</span>
-        <span class="fermer">X</span>
-      </div>
-    </div>
-    <form action="catalogue.php" method="get" class="form-catalogue">
-      <div>
-        <label for="type">Type de produit :</label>
-        <select id="type" name="type">
-          <option value="">Tous</option>
-          <option value="cravate">Cravate</option>
-          <option value="chemise">Chemise</option>
-        </select>
-      </div>
+  <v-container>
+    <v-card class="fenetre">
+      <v-card-title class="barre">
+        <span class="titre-fenetre">Fenêtre Catalogue</span>
+        <v-spacer></v-spacer>
+        <v-btn icon small class="moins">
+          <v-icon>-</v-icon>
+        </v-btn>
+        <v-btn icon small class="ouvrir">
+          <v-icon>[ ]</v-icon>
+        </v-btn>
+        <v-btn icon small class="fermer">
+          <v-icon>X</v-icon>
+        </v-btn>
+      </v-card-title>
 
-      <div>
-        <label for="couleur">Couleur :</label>
-        <select id="couleur" name="couleur">
-          <option value="">Toutes</option>
-          <option value="bleu">Bleu</option>
-          <option value="violet">Violet</option>
-          <option value="rose">Rose</option>
-          <option value="mauve">Mauve</option>
-          <option value="blanc">Blanc</option>
-        </select>
-      </div>
+      <v-card-text>
+        <v-form @submit.prevent="filterProducts" class="form-catalogue">
+          <v-row>
+            <v-col cols="12" sm="6" md="4">
+              <v-select
+                v-model="filters.type"
+                :items="['Tous', 'Cravate', 'Chemise']"
+                label="Type de produit"
+                dense
+              ></v-select>
+            </v-col>
 
-      <div>
-        <label for="taille">Taille :</label>
-        <select id="taille" name="taille">
-          <option value="">Toutes</option>
-          <option value="Unique">Unique</option>
-          <option value="44-56">44-56</option>
-        </select>
-      </div>
+            <v-col cols="12" sm="6" md="4">
+              <v-select
+                v-model="filters.couleur"
+                :items="['Toutes', 'Bleu', 'Violet', 'Rose', 'Mauve', 'Blanc']"
+                label="Couleur"
+                dense
+              ></v-select>
+            </v-col>
 
-      <div>
-        <label for="prix_min">Prix minimum :</label>
-        <input
-          type="number"
-          id="prix_min"
-          name="prix_min"
-          min="0"
-          step="0.01"
-        />
-      </div>
+            <v-col cols="12" sm="6" md="4">
+              <v-select
+                v-model="filters.taille"
+                :items="['Toutes', 'Unique', '44-56']"
+                label="Taille"
+                dense
+              ></v-select>
+            </v-col>
 
-      <div>
-        <label for="prix_max">Prix maximum :</label>
-        <input
-          type="number"
-          id="prix_max"
-          name="prix_max"
-          min="0"
-          step="0.01"
-        />
-      </div>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model.number="filters.prixMin"
+                label="Prix minimum"
+                type="number"
+                dense
+              ></v-text-field>
+            </v-col>
 
-      <div>
-        <input type="submit" value="Filtrer" class="sora-font" />
-      </div>
-    </form>
-    <div class="product-container">
-      <div id="product-list"></div>
-    </div>
-  </div>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model.number="filters.prixMax"
+                label="Prix maximum"
+                type="number"
+                dense
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="6" md="4">
+              <v-btn type="submit" color="primary">Filtrer</v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
+
+        <div class="product-container">
+          <div v-if="filteredProducts.length === 0">Aucun produit trouvé.</div>
+          <v-row>
+            <v-col
+              v-for="product in filteredProducts"
+              :key="product.id"
+              cols="12"
+              sm="6"
+              md="4"
+            >
+              <v-card
+                class="product-card"
+                :href="`/Labo03/product_detail/${product.id}`"
+              >
+                <v-img
+                  :src="product.image"
+                  :alt="product.name"
+                  class="product-image"
+                ></v-img>
+                <v-card-title>{{ product.name }}</v-card-title>
+                <v-card-subtitle>{{ product.prix }} €</v-card-subtitle>
+              </v-card>
+            </v-col>
+          </v-row>
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
-<script setup>
-const app = document.getElementById("product-list");
+<script>
+import axios from "axios";
 
-const url = "/Labo03/api/produits";
-
-fetch(url)
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP : ${response.status}`);
-    }
-
-    return response.text().then((text) => {
+export default {
+  data() {
+    return {
+      products: [],
+      filters: {
+        type: "",
+        couleur: "",
+        taille: "",
+        prixMin: null,
+        prixMax: null,
+      },
+    };
+  },
+  computed: {
+    filteredProducts() {
+      return this.products.filter((product) => {
+        const matchesType =
+          !this.filters.type || product.type === this.filters.type;
+        const matchesCouleur =
+          !this.filters.couleur || product.couleur === this.filters.couleur;
+        const matchesTaille =
+          !this.filters.taille || product.taille === this.filters.taille;
+        const matchesPrixMin =
+          this.filters.prixMin === null || product.prix >= this.filters.prixMin;
+        const matchesPrixMax =
+          this.filters.prixMax === null || product.prix <= this.filters.prixMax;
+        return (
+          matchesType &&
+          matchesCouleur &&
+          matchesTaille &&
+          matchesPrixMin &&
+          matchesPrixMax
+        );
+      });
+    },
+  },
+  methods: {
+    async fetchProducts() {
       try {
-        return JSON.parse(text);
+        const response = await axios.get("/Labo03/api/produits");
+        this.products = response.data;
       } catch (error) {
-        throw new Error("La réponse n'est pas un JSON valide");
+        console.error("Erreur lors de la récupération des produits :", error);
       }
-    });
-  })
-  .then((products) => {
-    let html = '<div class="product-container">';
-    products.forEach((product) => {
-      html += `
-        <div class="product-card">
-          <a href="product_detail.php?id=${product.id}">
-            <img src="${product.image}" alt="${product.name}" class="product-image" />
-            <h3>${product.name}</h3>
-            <p>${product.prix} €</p>
-          </a>
-        </div>
-      `;
-    });
-    html += "</div>";
-
-    app.innerHTML = html;
-  })
-  .catch((error) => {
-    console.error("Erreur:", error);
-    app.innerHTML = `<p>Une erreur est survenue : ${error.message}</p>`;
-  });
+    },
+    filterProducts() {
+      console.log("Produits filtrés :", this.filteredProducts);
+    },
+  },
+  mounted() {
+    this.fetchProducts();
+  },
+};
 </script>
 
 <style scoped>
+.fenetre {
+  background: linear-gradient(180deg, #ff9cee, #fcc4ff);
+  border: 2px solid #000000;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 1200px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.barre {
+  display: flex;
+  justify-content: space-between;
+  background-color: #6200ea;
+  color: #ffffff;
+  padding: 10px;
+  border-radius: 8px 8px 0 0;
+}
+
 .product-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  margin: 0 auto;
-  max-width: 1200px;
-}
-
-.product-card > a {
-  color: black;
-  text-decoration: none;
+  margin: 20px 0;
 }
 
 .product-card {
-  background: url(images/Fond-produits.png), url(images/fond_3.png),
-    linear-gradient(180deg, rgb(223, 70, 218) 0%, rgb(194, 57, 224) 100%)
-      no-repeat;
-  background-size: 100%, cover;
-  background-position: center, -190px 0px;
-  margin: 0;
-  border: 2px solid #000000;
-  padding: 20px;
-  margin: 10px;
-  width: 220px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  text-align: center;
-}
-
-.product-card p {
-  font-weight: 500;
 }
 
 .product-card:hover {
@@ -157,30 +196,6 @@ fetch(url)
 .product-image {
   width: 100%;
   height: auto;
-  border-radius: 0px;
-}
-
-.form-catalogue {
-  background-color: rgb(141, 28, 186);
-  display: flex;
-  justify-content: space-between;
-  font-weight: 500;
-  color: rgb(1, 205, 254);
-  padding: 10px;
-}
-
-.form-catalogue input[type="number"] {
-  width: 60px;
-}
-
-.form-catalogue input[type="submit"] {
-  border: 1px solid black;
-  background-color: rgb(1, 205, 254);
-  font-weight: 600;
-}
-
-.form-catalogue input[type="submit"]:hover {
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-  cursor: pointer;
+  border-radius: 5px;
 }
 </style>

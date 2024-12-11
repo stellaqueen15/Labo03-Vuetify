@@ -1,37 +1,3 @@
-<template>
-  <v-container>
-    <v-row justify="center" align="center" class="pa-4">
-      <v-col cols="12" md="6">
-        <!-- Fenêtre de connexion -->
-        <v-card>
-          <v-card-title class="text-h5">Connexion</v-card-title>
-
-          <!-- Formulaire -->
-          <v-form @submit.prevent="handleLogin">
-            <v-text-field
-              label="Email"
-              v-model="email"
-              type="email"
-              required
-              outlined
-            ></v-text-field>
-
-            <v-text-field
-              label="Mot de passe"
-              v-model="password"
-              type="password"
-              required
-              outlined
-            ></v-text-field>
-
-            <v-btn type="submit" color="primary" block> Se connecter </v-btn>
-          </v-form>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
-</template>
-
 <script>
 export default {
   data() {
@@ -83,6 +49,40 @@ export default {
   },
 };
 </script>
+
+<template>
+  <v-container>
+    <v-row justify="center" align="center" class="pa-4">
+      <v-col cols="12" md="6">
+        <!-- Fenêtre de connexion -->
+        <v-card>
+          <v-card-title class="text-h5">Connexion</v-card-title>
+
+          <!-- Formulaire -->
+          <v-form @submit.prevent="handleLogin">
+            <v-text-field
+              label="Email"
+              v-model="email"
+              type="email"
+              required
+              outlined
+            ></v-text-field>
+
+            <v-text-field
+              label="Mot de passe"
+              v-model="password"
+              type="password"
+              required
+              outlined
+            ></v-text-field>
+
+            <v-btn type="submit" color="primary" block> Se connecter </v-btn>
+          </v-form>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
 
 <style>
 .contenu-connexion {
