@@ -54,6 +54,16 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    proxy: {
+      "/Labo03/api": {
+        target: "http://localhost:4208", // L'URL de ton serveur API
+        changeOrigin: true, // Permet de modifier l'origin de la requête
+        secure: false, // Désactive la vérification du certificat SSL si tu utilises HTTP
+        pathRewrite: {
+          "^/Labo03/api": "", // Retirer '/Labo03/api' de l'URL avant de la transmettre à l'API
+        },
+      },
+    },
   },
   css: {
     preprocessorOptions: {

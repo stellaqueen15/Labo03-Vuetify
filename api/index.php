@@ -1,22 +1,14 @@
 <?php
-// Toujours mettre ces en-têtes en haut du fichier, avant toute autre sortie
-header("Access-Control-Allow-Origin: http://localhost:4208");  // Permet au frontend d'accéder à l'API
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");  // Permet les méthodes HTTP spécifiées
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");  // Permet les en-têtes utilisés par les requêtes
-
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    // Répond à la requête OPTIONS avec un statut 200
-    header('HTTP/1.1 200 OK');
-    exit(0);  // Fin de la requête OPTIONS
-}
-
 require_once '../UserController.php';
 require_once '../ProductController.php';
 require_once '../UserView.php';
 require_once '../ProductView.php';
 require_once '../database.php';
 require_once '../nettoyage.php';
-session_start();
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Récupère l'URI et la méthode HTTP
 $uri = $_SERVER['REQUEST_URI'];
@@ -25,6 +17,17 @@ $method = $_SERVER['REQUEST_METHOD'];
 // Instancie le contrôleur
 $productController = new ProductController($database);
 $userController = new UserController($database);
+
+// Vérifier si l'utilisateur est connecté
+if ($method == 'GET' && $uri == '/Labo03/api/check-login') {
+
+    if (isset($_SESSION['email'])) {
+        echo json_encode(['loggedIn' => true]);
+    } else {
+        echo json_encode(['loggedIn' => false]);
+    }
+    exit();
+}
 
 //GET pour avoir les produits
 if ($method == 'GET' && $uri == '/Labo03/api/produits') {
@@ -267,52 +270,87 @@ if ($method == 'POST' && $uri == '/Labo03/api/user') {
     exit();
 }
 
-
 // POST pour la connexion de l'utilisateur
 if ($method == 'POST' && $uri == '/Labo03/api/login') {
-    header('Content-Type: application/json');
-
-    // Récupérer les données envoyées en POST
+    // Récupérer les données JSON envoyées par le frontend
     $data = json_decode(file_get_contents('php://input'));
 
-    $email = $data->email ?? '';
-    $password = $data->password ?? '';
+    // Assurer que les données sont bien définies
+    $email = isset($data->email) ? trim(sanitizeString($data->email)) : '';
+    $password_user = isset($data->password) ? trim(sanitizeString($data->password)) : '';
 
-    if (!$email || !$password) {
-        http_response_code(400);
+    // Si l'email et le mot de passe sont vides
+    if (empty($email) || empty($password_user)) {
         echo json_encode(['message' => 'Email et mot de passe sont requis.']);
+        http_response_code(400); // Mauvaise requête
         exit();
     }
 
-    // Rechercher l'utilisateur dans la base de données
-    $user = $database->prepare('SELECT * FROM users WHERE email = ?');
-    $user->execute([$email]);
-    $userData = $user->fetch();
+    // Vérifier l'utilisateur dans la base de données
+    $recupUser = $database->prepare('SELECT * FROM users WHERE email = ?');
+    $recupUser->execute(array($email));
 
-    if ($userData) {
-        // Vérifier si le mot de passe est correct
-        if (password_verify($password, $userData['password'])) {
-            // Si la connexion est réussie, démarrer la session et stocker les informations de l'utilisateur
-            session_start();
-            $_SESSION['user_id'] = $userData['id'];
-            $_SESSION['email'] = $userData['email'];
+    if ($recupUser->rowCount() > 0) {
+        $user = $recupUser->fetch();
+        // Vérification du mot de passe
+        if (password_verify($password_user, $user['password'])) {
+            // Connexion réussie - création d'une session pour l'utilisateur
+            $_SESSION['email'] = $email;
+            $_SESSION['name'] = $user['name'];
+            $_SESSION['id'] = $user['id'];
 
+            // Réponse avec succès en JSON
+            header('Content-Type: application/json');
             echo json_encode([
+                'success' => true,
                 'message' => 'Connexion réussie.',
                 'user' => [
-                    'id' => $userData['id'],
-                    'email' => $userData['email'],
-                ]
+                    'id' => $user['id'],
+                    'email' => $user['email'],
+                    'name' => $user['name']
+                ],
             ]);
         } else {
-            http_response_code(401);
             echo json_encode(['message' => 'Mot de passe incorrect.']);
+            http_response_code(401); // Non autorisé
         }
     } else {
-        http_response_code(404);
-        echo json_encode(['message' => 'Utilisateur non trouvé.']);
+        echo json_encode(['message' => 'Aucun utilisateur trouvé avec cet email.']);
+        http_response_code(404); // Non trouvé
     }
+    exit();
+}
 
+// POST pour s'inscrire à l'infolettre
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $uri === '/Labo03/api/subscribe-newsletter') {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($data['email-newsletter'])) {
+        $email = filter_var($data['email-newsletter'], FILTER_SANITIZE_EMAIL);
+
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // Vérifier si l'email est déjà inscrit à l'infolettre
+            $query = $database->prepare('SELECT * FROM abonnements_infolettre WHERE email = ?');
+            $query->execute([$email]);
+            $existingUser = $query->fetch();
+
+            if (!$existingUser) {
+                // Inscrire l'email dans la base de données
+                $stmt = $database->prepare('INSERT INTO abonnements_infolettre (email) VALUES (?)');
+                if ($stmt->execute([$email])) {
+                    echo json_encode(["success" => true, "message" => "Merci de vous être abonné à notre infolettre !"]);
+                } else {
+                    echo json_encode(["success" => false, "message" => "Une erreur est survenue lors de l'inscription. Veuillez réessayer."]);
+                }
+            } else {
+                echo json_encode(["success" => false, "message" => "Cet e-mail est déjà inscrit à notre infolettre."]);
+            }
+        } else {
+            echo json_encode(["success" => false, "message" => "Veuillez entrer une adresse e-mail valide."]);
+        }
+    } else {
+        echo json_encode(["success" => false, "message" => "L'email est requis."]);
+    }
     exit();
 }
 

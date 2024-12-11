@@ -11,9 +11,7 @@
     <!-- Affichage des liens uniquement si l'utilisateur est connecté -->
     <v-btn v-if="isLoggedIn" to="/profil">Profil</v-btn>
     <v-btn v-if="isLoggedIn" to="/panier">Panier</v-btn>
-    <v-btn v-if="isLoggedIn" to="/deconnexion" @click="logout"
-      >Déconnexion</v-btn
-    >
+    <v-btn v-if="isLoggedIn" to="/deconnexion">Déconnexion</v-btn>
 
     <!-- Affichage des liens uniquement si l'utilisateur n'est pas connecté -->
     <v-btn v-if="!isLoggedIn" to="/connexion">Connexion</v-btn>
@@ -25,34 +23,32 @@
 export default {
   data() {
     return {
-      isLoggedIn: false,
+      isLoggedIn: false, // État de la connexion
     };
   },
   created() {
-    // Vérifier l'état de connexion de l'utilisateur via l'API profil
     this.checkLoginStatus();
   },
   methods: {
-    async checkLoginStatus() {
-      try {
-        // Effectuer une requête GET vers l'API pour vérifier si l'utilisateur est connecté
-        const response = await this.$axios.get("/Labo03/api/user/profil");
-
-        if (response.data.success) {
-          this.isLoggedIn = true;
-        } else {
-          this.isLoggedIn = false;
-        }
-      } catch (error) {
-        // En cas d'erreur (par exemple si l'utilisateur n'est pas connecté), on le considère comme déconnecté
-        this.isLoggedIn = false;
-      }
-    },
-    logout() {
-      // Déconnexion: on supprime le token du sessionStorage
-      sessionStorage.removeItem("auth_token");
-      this.isLoggedIn = false;
-      this.$router.push("/"); // Rediriger vers la page d'accueil
+    checkLoginStatus() {
+      fetch("/Labo03/api/check-login", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json()) // Parser la réponse en JSON
+        .then((data) => {
+          if (data.loggedIn) {
+            this.isLoggedIn = true; // L'utilisateur est connecté
+          } else {
+            this.isLoggedIn = false; // L'utilisateur n'est pas connecté
+          }
+        })
+        .catch((error) => {
+          console.error("Erreur de connexion:", error);
+          this.isLoggedIn = false; // En cas d'erreur, on assume que l'utilisateur n'est pas connecté
+        });
     },
   },
 };

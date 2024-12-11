@@ -41,7 +41,6 @@ export default {
     };
   },
   methods: {
-    // Fonction pour envoyer la requête de connexion
     handleLogin() {
       fetch("/Labo03/api/login", {
         method: "POST",
@@ -53,13 +52,27 @@ export default {
           password: this.password,
         }),
       })
-        .then((response) => response.json()) // Transforme la réponse en JSON
+        .then((response) => {
+          console.log("Réponse brute du serveur:", response); // Affiche la réponse brute avant traitement
+          if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+          }
+          return response.text(); // Utilise text() pour récupérer la réponse brute
+        })
         .then((data) => {
-          if (data.success) {
-            localStorage.setItem("user_id", data.user.id); // Enregistrer un ID utilisateur par exemple
-            this.$router.push("/dashboard"); // Rediriger vers une page après connexion
-          } else {
-            alert(data.message); // Afficher un message d'erreur si la connexion échoue
+          console.log("Données retournées:", data); // Affiche le contenu brut
+          try {
+            const jsonData = JSON.parse(data); // Tente de parser le contenu en JSON
+            console.log("Réponse JSON:", jsonData);
+            if (jsonData.success) {
+              alert("Connexion réussie !");
+              this.$router.push("/accueil");
+            } else {
+              alert(jsonData.message); // Affiche un message d'erreur détaillé
+            }
+          } catch (error) {
+            console.error("Erreur lors du parsing JSON:", error);
+            alert("Une erreur est survenue. Veuillez réessayer.");
           }
         })
         .catch((error) => {

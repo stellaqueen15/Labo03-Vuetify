@@ -50,36 +50,35 @@ export default {
   },
   methods: {
     handleSignup() {
-      fetch("http://localhost:4208/Labo03/api/user", {
-        method: "POST", // Méthode POST
+      fetch("/Labo03/api/user", {
+        method: "POST",
         headers: {
-          "Content-Type": "application/json", // Nous envoyons du JSON
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: this.name, // Données envoyées
+          name: this.name,
           email: this.email,
           password: this.password,
         }),
-        mode: "cors", // Ajout du mode CORS pour explicitement activer les en-têtes CORS
       })
         .then((response) => {
-          console.log("Réponse du serveur:", response); // Ajoute ceci pour voir la réponse
+          console.log("Réponse du serveur:", response);
           if (!response.ok) {
             throw new Error(`Erreur HTTP: ${response.status}`);
           }
-          return response.json(); // Traite la réponse JSON
+          return response.json();
         })
         .then((data) => {
-          console.log(data); // Affiche la réponse du serveur
+          console.log(data);
           if (data.success) {
             alert("Inscription réussie !");
             this.$router.push("/connexion");
           } else {
-            alert(data.message); // Affiche un message d'erreur détaillé
+            alert(data.message);
           }
         })
         .catch((error) => {
-          console.error("Erreur lors de l'inscription:", error); // Affiche l'erreur dans la console
+          console.error("Erreur lors de l'inscription:", error);
           alert("Une erreur est survenue. Veuillez réessayer.");
         });
     },
