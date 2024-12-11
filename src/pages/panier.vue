@@ -1,4 +1,3 @@
-panier.vue :
 <template>
   <v-container>
     <v-card class="fenetre">
@@ -73,6 +72,7 @@ panier.vue :
 <script setup>
 import { computed } from "vue";
 import { useAppStore } from "@/stores/app";
+import { loadStripe } from "@stripe/stripe-js";
 
 const store = useAppStore();
 
@@ -86,9 +86,42 @@ const removeItem = (index) => {
   store.removeFromCart(index);
 };
 
-const validateCart = () => {
+const validateCart = async () => {
+  const totalAmount = total.value * 100; // Montant total en centimes pour Stripe (USD ou EUR)
+
+  // Envoi de la requête au backend pour créer une session de paiement
+  try {
+    const response = await fetch("http://localhost:4208/Labo03/checkout.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ totalAmount }),
+    });
+
+    const session = await response.json();
+
+    // Redirection vers Stripe Checkout avec l'ID de la session
+    const stripe = Stripe(
+      "pk_test_51QUwMsHysDGSSOG5GRasYqfxtx1fUgHUEdtieFTXW3KkfSuyvYHHSH6t4HXPWk4gTRfubTN0J89oKoRkHlZwrJl700HBoG1GVC"
+    ); // Remplace par ta clé publique Stripe
+    const { error } = await stripe.redirectToCheckout({
+      sessionId: session.id,
+    });
+
+    if (error) {
+      console.error("Erreur lors de la redirection vers Stripe:", error);
+      alert("Une erreur est survenue lors de la tentative de paiement.");
+    }
+  } catch (error) {
+    console.error(
+      "Erreur lors de la création de la session de paiement:",
+      error
+    );
+    alert("Une erreur est survenue. Veuillez réessayer.");
+  }
+
   store.clearCart();
-  alert("Votre commande a été validée.");
 };
 </script>
 

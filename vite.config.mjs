@@ -63,6 +63,14 @@ export default defineConfig({
           "^/Labo03/api": "", // Retirer '/Labo03/api' de l'URL avant de la transmettre à l'API
         },
       },
+      "/Labo03/checkout.php": {
+        target: "http://localhost:4208", // L'URL de ton serveur pour checkout.php
+        changeOrigin: true, // Permet de modifier l'origin de la requête
+        secure: false, // Désactive la vérification du certificat SSL si tu utilises HTTP
+        pathRewrite: {
+          "^/Labo03/checkout.php": "", // Retirer '/checkout.php' avant d'envoyer la requête
+        },
+      },
     },
   },
   css: {
