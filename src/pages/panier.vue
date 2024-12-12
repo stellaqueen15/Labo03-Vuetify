@@ -91,18 +91,17 @@ const validateCart = async () => {
           </v-list-item>
         </v-list>
 
-        <v-card-actions class="conteneur-panier">
-          <v-card-text class="prix-total"
-            >Total : {{ total.toFixed(2) }} €</v-card-text
-          >
-          <v-btn
-            color="primary"
-            class="boutonValiderPanier"
-            @click="validateCart"
-          >
-            Valider le Panier
-          </v-btn>
-        </v-card-actions>
+        <v-card-text class="prix-total"
+          >Total : {{ total.toFixed(2) }} €</v-card-text
+        >
+        <v-btn
+          color="#8f1aa2"
+          class="boutonValiderPanier"
+          prepend-icon="mdi-check"
+          @click="validateCart"
+        >
+          Valider le Panier
+        </v-btn>
 
         <v-card-text v-if="cart.length === 0" class="loading">
           Votre panier est vide.
@@ -136,6 +135,7 @@ const validateCart = async () => {
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
+  border-radius: 20px 20px 0 0;
 }
 
 .boutons-fenetre-panier .v-btn {
@@ -144,22 +144,29 @@ const validateCart = async () => {
 
 .prix-total {
   text-align: center;
-  font-weight: 600;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 20px;
+  background-color: #8f1aa2;
+  border-radius: 20px;
+  padding: 0;
+  color: white;
 }
 
 .boutonValiderPanier {
-  margin-top: 10px;
+  left: 283px;
+  margin-top: 20px;
 }
 
 .conteneur {
   display: flex;
   align-items: center;
-  background: linear-gradient(-90deg, rgb(1, 205, 254), rgb(175, 233, 255));
+  background-color: #c322ab;
 }
 
 .image-conteneur {
   border-radius: 30px;
-  height: 200px;
+  margin: 10px 0 10px 10px;
 }
 
 .conteneur p {
