@@ -161,7 +161,7 @@ const validateCart = async () => {
 .conteneur {
   display: flex;
   align-items: center;
-  background-color: #c322ab;
+  background: linear-gradient(180deg, #8e09b4, #ae08ae);
 }
 
 .image-conteneur {

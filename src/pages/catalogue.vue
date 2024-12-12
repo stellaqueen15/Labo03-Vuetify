@@ -3,26 +3,17 @@
     <v-card class="fenetre">
       <v-card-title class="barre">
         <span class="titre-fenetre">Fenêtre Catalogue</span>
-        <v-spacer></v-spacer>
-        <v-btn icon small class="moins">
-          <v-icon>-</v-icon>
-        </v-btn>
-        <v-btn icon small class="ouvrir">
-          <v-icon>[ ]</v-icon>
-        </v-btn>
-        <v-btn icon small class="fermer">
-          <v-icon>X</v-icon>
-        </v-btn>
       </v-card-title>
-
-      <v-card-text>
+      <v-card class="contenu-fenetre">
         <v-form @submit.prevent="filterProducts" class="form-catalogue">
-          <v-row>
+          <v-row class="contenu-filtrage">
             <v-col cols="12" sm="6" md="4">
               <v-select
                 v-model="filters.type"
                 :items="['Tous', 'Cravate', 'Chemise']"
+                variant="solo"
                 label="Type de produit"
+                style="width: 150px"
                 dense
               ></v-select>
             </v-col>
@@ -31,6 +22,8 @@
               <v-select
                 v-model="filters.couleur"
                 :items="['Toutes', 'Bleu', 'Violet', 'Rose', 'Mauve', 'Blanc']"
+                variant="solo"
+                style="width: 150px"
                 label="Couleur"
                 dense
               ></v-select>
@@ -39,7 +32,19 @@
             <v-col cols="12" sm="6" md="4">
               <v-select
                 v-model="filters.taille"
-                :items="['Toutes', 'Unique', '44-56']"
+                :items="[
+                  'Toutes',
+                  'Unique',
+                  '44',
+                  '46',
+                  '48',
+                  '50',
+                  '52',
+                  '54',
+                  '56',
+                ]"
+                style="width: 150px"
+                variant="solo"
                 label="Taille"
                 dense
               ></v-select>
@@ -48,7 +53,9 @@
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model.number="filters.prixMin"
+                variant="solo"
                 label="Prix minimum"
+                style="width: 150px"
                 type="number"
                 dense
               ></v-text-field>
@@ -57,14 +64,12 @@
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model.number="filters.prixMax"
+                variant="solo"
                 label="Prix maximum"
+                style="width: 150px"
                 type="number"
                 dense
               ></v-text-field>
-            </v-col>
-
-            <v-col cols="12" sm="6" md="4">
-              <v-btn type="submit" color="primary">Filtrer</v-btn>
             </v-col>
           </v-row>
         </v-form>
@@ -94,7 +99,7 @@
             </v-col>
           </v-row>
         </div>
-      </v-card-text>
+      </v-card>
     </v-card>
   </v-container>
 </template>
@@ -162,19 +167,20 @@ export default {
 
 <style scoped>
 .fenetre {
-  background: linear-gradient(180deg, #ff9cee, #fcc4ff);
-  border: 2px solid #000000;
+  background: linear-gradient(180deg, #a728cb, #b217a3);
+  border-radius: 16px;
+  width: 800px;
+}
+
+.contenu-fenetre {
+  background: linear-gradient(180deg, #a728cb, #b217a3);
   padding: 20px;
-  margin: 20px auto;
-  max-width: 1200px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
 }
 
 .barre {
   display: flex;
   justify-content: space-between;
-  background-color: #6200ea;
+  background-color: rgb(141, 28, 186);
   color: #ffffff;
   padding: 10px;
   border-radius: 8px 8px 0 0;
@@ -189,6 +195,8 @@ export default {
 
 .product-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: linear-gradient(180deg, #a728cb, #8f1aa2);
+  color: white;
 }
 
 .product-card:hover {
@@ -200,5 +208,12 @@ export default {
   width: 100%;
   height: auto;
   border-radius: 5px;
+}
+
+.contenu-filtrage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 37px;
 }
 </style>
