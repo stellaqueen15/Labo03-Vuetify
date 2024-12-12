@@ -14,13 +14,21 @@
         <p><strong>Taille :</strong> {{ product.taille }}</p>
         <p><strong>Type :</strong> {{ product.type }}</p>
       </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" @click="addToCart" class="add-to-cart"
-          >Ajouter au panier</v-btn
-        >
+      <v-card-actions class="boutons">
         <router-link to="/catalogue" class="back-link">
-          <v-btn color="secondary">Retour au catalogue</v-btn>
+          <v-btn prepend-icon="mdi-arrow-left" variant="tonal" color="#c9f3ff">
+            Retour au catalogue
+          </v-btn>
         </router-link>
+        <v-btn
+          prepend-icon="mdi-cart"
+          variant="tonal"
+          color="#f8d2ff"
+          @click="addToCart"
+          class="add-to-cart"
+        >
+          Ajouter au panier
+        </v-btn>
       </v-card-actions>
     </v-card>
 
@@ -86,17 +94,19 @@ export default {
   margin: 20px auto;
   max-width: 600px;
   text-align: center;
-  background: linear-gradient(180deg, #ffffff, #f0f0f0);
+  background: linear-gradient(180deg, #a728cb, #b217a3);
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: white;
 }
 
 .product-image {
   width: 100%;
   max-width: 300px;
   margin: 0 auto 20px;
-  border-radius: 5px;
+  border-radius: 50px;
+  border: 5px solid #cd1fbc;
 }
 
 .add-to-cart {
@@ -112,5 +122,11 @@ export default {
   text-align: center;
   font-size: 1.5em;
   color: #6200ea;
+}
+
+.boutons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

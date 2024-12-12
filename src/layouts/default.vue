@@ -28,7 +28,7 @@ body {
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  background: url(images/fond_2.png),
+  background: url(/images/fond_2.png),
     linear-gradient(
         180deg,
         rgba(185, 103, 255, 1) 0%,

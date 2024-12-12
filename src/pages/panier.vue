@@ -1,22 +1,66 @@
+<script setup>
+import { computed } from "vue";
+import { useAppStore } from "@/stores/app";
+import { loadStripe } from "@stripe/stripe-js";
+
+const store = useAppStore();
+
+const cart = computed(() => store.panier);
+
+const total = computed(() =>
+  cart.value.reduce((sum, item) => sum + parseFloat(item.prix), 0)
+);
+
+const removeItem = (index) => {
+  store.removeFromCart(index);
+};
+
+const validateCart = async () => {
+  const totalAmount = total.value * 100;
+
+  try {
+    const response = await fetch("http://localhost:4208/Labo03/checkout.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ totalAmount }),
+    });
+
+    const session = await response.json();
+
+    const stripe = Stripe(
+      "pk_test_51QUwMsHysDGSSOG5GRasYqfxtx1fUgHUEdtieFTXW3KkfSuyvYHHSH6t4HXPWk4gTRfubTN0J89oKoRkHlZwrJl700HBoG1GVC"
+    );
+    const { error } = await stripe.redirectToCheckout({
+      sessionId: session.id,
+    });
+
+    if (error) {
+      console.error("Erreur lors de la redirection vers Stripe:", error);
+      alert("Une erreur est survenue lors de la tentative de paiement.");
+    }
+  } catch (error) {
+    console.error(
+      "Erreur lors de la création de la session de paiement:",
+      error
+    );
+    alert("Une erreur est survenue. Veuillez réessayer.");
+  }
+
+  store.clearCart();
+};
+</script>
+
 <template>
   <v-container>
     <v-card class="fenetre">
       <v-card-title class="barre">
         <span class="titre-fenetre">Panier</span>
-        <v-spacer></v-spacer>
-        <v-btn icon small class="moins">
-          <v-icon>-</v-icon>
-        </v-btn>
-        <v-btn icon small class="ouvrir">
-          <v-icon>[ ]</v-icon>
-        </v-btn>
-        <v-btn icon small class="fermer">
-          <v-icon>X</v-icon>
-        </v-btn>
       </v-card-title>
 
       <v-card-text>
-        <v-list class="liste-panier">
+        <v-list class="liste-panier fenetre">
           <v-list-item
             v-for="(item, index) in cart"
             :key="index"
@@ -25,12 +69,6 @@
             <v-card class="barre-panier">
               <v-card-title>{{ item.name }}</v-card-title>
               <v-card-actions class="boutons-fenetre-panier">
-                <v-btn icon small class="moins">
-                  <v-icon>-</v-icon>
-                </v-btn>
-                <v-btn icon small class="ouvrir">
-                  <v-icon>[ ]</v-icon>
-                </v-btn>
                 <v-btn icon small @click="removeItem(index)" class="fermer">
                   <v-icon>mdi-close</v-icon>
                 </v-btn>
@@ -39,7 +77,12 @@
 
             <v-row class="conteneur">
               <v-col cols="4">
-                <v-img :src="item.image" :alt="item.name" width="150"></v-img>
+                <v-img
+                  :src="item.image"
+                  :alt="item.name"
+                  width="150"
+                  class="image-conteneur"
+                ></v-img>
               </v-col>
               <v-col cols="8">
                 <p>{{ parseFloat(item.prix).toFixed(2) }} €</p>
@@ -69,66 +112,16 @@
   </v-container>
 </template>
 
-<script setup>
-import { computed } from "vue";
-import { useAppStore } from "@/stores/app";
-import { loadStripe } from "@stripe/stripe-js";
-
-const store = useAppStore();
-
-const cart = computed(() => store.panier);
-
-const total = computed(() =>
-  cart.value.reduce((sum, item) => sum + parseFloat(item.prix), 0)
-);
-
-const removeItem = (index) => {
-  store.removeFromCart(index);
-};
-
-const validateCart = async () => {
-  const totalAmount = total.value * 100; // Montant total en centimes pour Stripe (USD ou EUR)
-
-  // Envoi de la requête au backend pour créer une session de paiement
-  try {
-    const response = await fetch("http://localhost:4208/Labo03/checkout.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ totalAmount }),
-    });
-
-    const session = await response.json();
-
-    // Redirection vers Stripe Checkout avec l'ID de la session
-    const stripe = Stripe(
-      "pk_test_51QUwMsHysDGSSOG5GRasYqfxtx1fUgHUEdtieFTXW3KkfSuyvYHHSH6t4HXPWk4gTRfubTN0J89oKoRkHlZwrJl700HBoG1GVC"
-    ); // Remplace par ta clé publique Stripe
-    const { error } = await stripe.redirectToCheckout({
-      sessionId: session.id,
-    });
-
-    if (error) {
-      console.error("Erreur lors de la redirection vers Stripe:", error);
-      alert("Une erreur est survenue lors de la tentative de paiement.");
-    }
-  } catch (error) {
-    console.error(
-      "Erreur lors de la création de la session de paiement:",
-      error
-    );
-    alert("Une erreur est survenue. Veuillez réessayer.");
-  }
-
-  store.clearCart();
-};
-</script>
-
 <style scoped>
 .liste-panier {
   list-style: none;
-  margin-left: 0;
+  margin-left: -20px;
+}
+
+.fenetre {
+  background: linear-gradient(180deg, #a728cb, #b217a3);
+  border-radius: 16px;
+  width: 800px;
 }
 
 .fenetre-panier {
@@ -161,6 +154,12 @@ const validateCart = async () => {
 .conteneur {
   display: flex;
   align-items: center;
+  background: linear-gradient(-90deg, rgb(1, 205, 254), rgb(175, 233, 255));
+}
+
+.image-conteneur {
+  border-radius: 30px;
+  height: 200px;
 }
 
 .conteneur p {

@@ -89,14 +89,14 @@ const customRoutes = [
     ],
   },
   {
-    path: "/Labo03/product_detail/:id",
+    path: "/product_detail/:id",
     component: () => import("@/layouts/default.vue"),
     children: [
       {
         path: "",
         name: "ProductDetail",
         component: () => import("@/pages/productDetail.vue"),
-        props: true, // Passe automatiquement l'ID en tant que prop au composant
+        props: true,
       },
     ],
   },

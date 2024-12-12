@@ -81,7 +81,7 @@
             >
               <v-card
                 class="product-card"
-                :href="`/Labo03/product_detail/${product.id}`"
+                :href="`/product_detail/${product.id}`"
               >
                 <v-img
                   :src="product.image"
@@ -107,9 +107,9 @@ export default {
     return {
       products: [],
       filters: {
-        type: "",
-        couleur: "",
-        taille: "",
+        type: "Tous",
+        couleur: "Toutes",
+        taille: "Toutes",
         prixMin: null,
         prixMax: null,
       },
@@ -119,11 +119,13 @@ export default {
     filteredProducts() {
       return this.products.filter((product) => {
         const matchesType =
-          !this.filters.type || product.type === this.filters.type;
+          this.filters.type === "Tous" || product.type === this.filters.type;
         const matchesCouleur =
-          !this.filters.couleur || product.couleur === this.filters.couleur;
+          this.filters.couleur === "Toutes" ||
+          product.couleur === this.filters.couleur;
         const matchesTaille =
-          !this.filters.taille || product.taille === this.filters.taille;
+          this.filters.taille === "Toutes" ||
+          product.taille === this.filters.taille;
         const matchesPrixMin =
           this.filters.prixMin === null || product.prix >= this.filters.prixMin;
         const matchesPrixMax =
@@ -143,6 +145,7 @@ export default {
       try {
         const response = await axios.get("/Labo03/api/produits");
         this.products = response.data;
+        console.log("Produits récupérés :", this.products);
       } catch (error) {
         console.error("Erreur lors de la récupération des produits :", error);
       }

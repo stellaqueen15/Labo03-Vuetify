@@ -1,4 +1,3 @@
-Profil.vue :
 <template>
   <v-container>
     <v-card class="fenetre">
