@@ -11,6 +11,4 @@
   </v-container>
 </template>
 
-<script setup>
-// Logique si nécessaire
-</script>
+<script setup></script>
