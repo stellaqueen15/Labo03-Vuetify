@@ -1,74 +1,3 @@
-<script>
-export default {
-  data() {
-    return {
-      email: "",
-      emailError: "",
-      message: "",
-      messageType: "",
-    };
-  },
-  methods: {
-    async subscribe() {
-      this.message = "";
-      this.messageType = "";
-      this.emailError = "";
-
-      if (!this.email) {
-        console.log("Email vide !");
-        this.emailError = "L'email est requis.";
-        return;
-      }
-
-      if (!this.isValidEmail(this.email)) {
-        console.log("Email invalide détecté : ", this.email);
-        this.emailError = "Adresse e-mail invalide.";
-        return;
-      }
-
-      try {
-        console.log("Envoi de la requête avec l'email : ", this.email);
-        const response = await fetch("/Labo03/api/subscribe-newsletter", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            "email-newsletter": this.email,
-          }),
-        });
-
-        console.log("Réponse reçue :", response);
-        if (!response.ok) {
-          throw new Error(`Erreur HTTP : ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Données reçues :", data);
-
-        if (data.success) {
-          this.message = "Vous êtes abonné avec succès !";
-          this.messageType = "success";
-          this.email = ""; // Réinitialiser le champ email
-        } else {
-          this.message = data.message || "Erreur lors de l'inscription.";
-          this.messageType = "error";
-        }
-      } catch (error) {
-        console.error("Erreur de requête :", error);
-        this.message = "Une erreur est survenue. Veuillez réessayer.";
-        this.messageType = "error";
-      }
-    },
-
-    isValidEmail(email) {
-      const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-      return regex.test(email);
-    },
-  },
-};
-</script>
-
 <template>
   <v-footer class="custom-footer" padless>
     <v-container>
@@ -121,6 +50,72 @@ export default {
     </v-container>
   </v-footer>
 </template>
+
+<script setup>
+import { ref } from "vue";
+
+const email = ref("");
+const emailError = ref("");
+const message = ref("");
+const messageType = ref("");
+
+const subscribe = async () => {
+  message.value = "";
+  messageType.value = "";
+  emailError.value = "";
+
+  if (!email.value) {
+    console.log("Email vide !");
+    emailError.value = "L'email est requis.";
+    return;
+  }
+
+  if (!isValidEmail(email.value)) {
+    console.log("Email invalide détecté : ", email.value);
+    emailError.value = "Adresse e-mail invalide.";
+    return;
+  }
+
+  try {
+    console.log("Envoi de la requête avec l'email : ", email.value);
+    const response = await fetch("/Labo03/api/subscribe-newsletter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        "email-newsletter": email.value,
+      }),
+    });
+
+    console.log("Réponse reçue :", response);
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP : ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Données reçues :", data);
+
+    if (data.success) {
+      message.value = "Vous êtes abonné avec succès !";
+      messageType.value = "success";
+      email.value = "";
+    } else {
+      message.value = data.message || "Erreur lors de l'inscription.";
+      messageType.value = "error";
+    }
+  } catch (error) {
+    console.error("Erreur de requête :", error);
+    message.value = "Une erreur est survenue. Veuillez réessayer.";
+    messageType.value = "error";
+  }
+};
+
+const isValidEmail = (email) => {
+  const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  return regex.test(email);
+};
+</script>
 
 <style scoped>
 .custom-footer {
