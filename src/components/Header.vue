@@ -1,52 +1,50 @@
-<script>
-export default {
-  data() {
-    return {
-      isLoggedIn: false,
-    };
-  },
-  created() {
-    this.checkLoginStatus();
-  },
-  methods: {
-    checkLoginStatus() {
-      fetch("/Labo03/api/check-login", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          this.isLoggedIn = data.loggedIn || false;
-        })
-        .catch((error) => {
-          console.error("Erreur de connexion:", error);
-          this.isLoggedIn = false;
-        });
-    },
-    logout() {
-      fetch("/Labo03/api/deconnexion", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            this.isLoggedIn = false;
-            this.$router.push("/connexion");
-          } else {
-            console.error("Erreur lors de la déconnexion:", data.message);
-          }
-        })
-        .catch((error) => {
-          console.error("Erreur réseau lors de la déconnexion:", error);
-        });
-    },
-  },
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const isLoggedIn = ref(false);
+const router = useRouter();
+
+const toggleDrawer = () => {
+  // Fonction pour activer/désactiver le menu
 };
+
+const logout = async () => {
+  try {
+    const response = await fetch("/Labo03/api/deconnexion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    if (data.success) {
+      isLoggedIn.value = false;
+      router.push("/connexion");
+    } else {
+      console.error("Erreur lors de la déconnexion:", data.message);
+    }
+  } catch (error) {
+    console.error("Erreur réseau lors de la déconnexion:", error);
+  }
+};
+
+// Vérifier le statut de la connexion à l'initialisation
+onMounted(async () => {
+  try {
+    const response = await fetch("/Labo03/api/check-login", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    isLoggedIn.value = data.loggedIn || false;
+  } catch (error) {
+    console.error("Erreur de connexion:", error);
+    isLoggedIn.value = false;
+  }
+});
 </script>
 
 <template>
@@ -66,14 +64,14 @@ export default {
     <v-btn v-if="isLoggedIn" to="/profil" class="nav-btn">Profil</v-btn>
     <v-btn v-if="isLoggedIn" to="/panier" class="nav-btn">Panier</v-btn>
 
-    <v-btn v-if="isLoggedIn" @click="logout" class="auth-btn"
-      >Déconnexion</v-btn
-    >
+    <v-btn v-if="isLoggedIn" @click="logout" class="auth-btn">
+      Déconnexion
+    </v-btn>
 
     <v-btn v-if="!isLoggedIn" to="/connexion" class="auth-btn">Connexion</v-btn>
-    <v-btn v-if="!isLoggedIn" to="/inscription" class="auth-btn"
-      >Inscription</v-btn
-    >
+    <v-btn v-if="!isLoggedIn" to="/inscription" class="auth-btn">
+      Inscription
+    </v-btn>
   </v-toolbar>
 </template>
 

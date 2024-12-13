@@ -1,203 +1,198 @@
 <template>
-  <div class="fenetre">
-    <div class="barre">
-      <span class="titre-fenetre">Fenêtre Accueil</span>
-      <div class="boutons-fenetre">
-        <span class="moins">-</span>
-        <span class="ouvrir">[ ]</span>
-        <span class="fermer">X</span>
-      </div>
-    </div>
-    <div class="contenu-fenetre">
-      <div class="logo-et-caroussel">
-        <img
-          src="/images/logo_RichRicasso.png"
-          alt="Logo Rich Ricasso"
-          id="logo"
-        />
-      </div>
-      <main>
-        <div class="contenu-main">
-          <div class="texte">
-            <h2>À propos de Rich Ricasso</h2>
+  <v-container fluid>
+    <v-row justify="center" align="center" class="welcome-section">
+      <v-col cols="12" sm="10" md="8" lg="6">
+        <v-card class="welcome-card" flat>
+          <v-img
+            src="/images/logo_RichRicasso.png"
+            alt="Logo Rich Ricasso"
+            height="180px"
+            contain
+            class="logo-img"
+          ></v-img>
+
+          <v-card-title class="text-center brand-title">
+            Rich Ricasso
+          </v-card-title>
+          <v-card-subtitle class="text-center subtitle">
+            Une touche d'élégance et d'originalité
+          </v-card-subtitle>
+
+          <v-divider></v-divider>
+          <v-card-text class="brand-description">
             <p>
-              Je suis Rich Ricasso, cravatier et chemisier de renom, passionné
-              par l'art de sublimer la mode à travers des pièces intemporelles.
-              Mon aventure a commencé avec une vision simple mais ambitieuse :
-              fusionner l'élégance classique avec l'esthétique moderne du
-              vaporwave et du vaporfashion. <br /><br />
-
-              Après des années à me perfectionner dans l'art de la confection de
-              cravates et chemises de luxe, j'ai vu mon style se propager parmi
-              les connaisseurs de mode du monde entier. Mes créations,
-              caractérisées par des tons pastel tels que le bleu ciel, le rose
-              poudré et le violet lavande, ont trouvé leur place dans l'univers
-              de l'ultra-luxe, s'adressant à ceux qui recherchent à la fois
-              singularité et raffinement.<br /><br />
-
-              Aujourd'hui, je souhaite partager cette passion avec un public
-              plus large, en lançant ma boutique en ligne. Cette plateforme est
-              dédiée à ma nouvelle gamme d'été en soie unisexe, alliant confort
-              et sophistication, tout en restant fidèle à l’esprit de ma marque.
-              Mon objectif est de vous offrir un accès direct à des créations à
-              la fois modernes et luxueuses, tout en reflétant mon amour pour
-              l’esthétique<br /><br />
-              vaporwave. Bienvenue dans l’univers de Rich Ricasso, où chaque
-              détail compte et où le luxe s’habille de nuances pastel pour
-              séduire tous ceux qui osent se démarquer.
+              Plongez dans l'univers de Rich Ricasso, où l'élégance rencontre
+              l'innovation. Des créations uniques qui allient sophistication et
+              une esthétique contemporaine.
             </p>
-          </div>
-          <div class="caroussel">
-            <img class="mySlides" src="/images/tie7.webp" />
-            <img class="mySlides" src="/images/tieX.webp" />
-            <img class="mySlides" src="/images/tshirt3.webp" />
-            <img class="mySlides" src="/images/tshirt2.webp" />
-          </div>
-        </div>
-        <div class="photos-accueil">
-          <img src="/images/tshirt2.webp" alt="" id="premier-image-accueil" />
-          <img src="/images/tie7.webp" alt="" id="deuxieme-image-accueil" />
-          <img src="/images/tshirt6.webp" alt="" id="troisieme-image-accueil" />
-        </div>
-      </main>
-    </div>
-  </div>
+          </v-card-text>
+
+          <v-carousel hide-delimiters>
+            <v-carousel-item
+              v-for="(item, index) in carouselImages"
+              :key="index"
+            >
+              <v-img
+                :src="item.src"
+                :alt="item.alt"
+                height="350px"
+                class="carousel-image"
+              ></v-img>
+            </v-carousel-item>
+          </v-carousel>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-row justify="center" class="product-gallery">
+      <v-col
+        v-for="(product, index) in products"
+        :key="index"
+        cols="12"
+        sm="6"
+        md="4"
+      >
+        <v-card class="product-card" @click="viewProduct(product)" outlined>
+          <v-img
+            :src="product.image"
+            alt="Product Image"
+            height="220px"
+            contain
+            class="product-image"
+          ></v-img>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Modal or detailed view section for the selected product -->
+    <v-dialog v-model="dialog" max-width="500px">
+      <v-card>
+        <v-card-title class="headline">Détails du Produit</v-card-title>
+        <v-card-text>
+          <v-img
+            :src="selectedProduct.image"
+            alt="Product Image"
+            height="300px"
+            contain
+          ></v-img>
+          <p>{{ selectedProduct.description }}</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="dialog = false">Fermer</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-container>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref } from "vue";
 
-<style>
-.fenetre {
-  width: 1200px;
-  border: 2px solid black;
-  background: linear-gradient(
-    360deg,
-    rgb(255, 113, 206) 0%,
-    rgb(214, 94, 241) 100%
-  );
-  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+// Produits et images du carrousel
+const products = ref([
+  {
+    id: 1,
+    image: "/images/tie7.webp",
+    description: "Une cravate moderne au design élégant.",
+  },
+  {
+    id: 2,
+    image: "/images/tshirt3.webp",
+    description: "Un t-shirt classique pour un look décontracté.",
+  },
+  {
+    id: 3,
+    image: "/images/tshirt6.webp",
+    description: "Un t-shirt avec un design original et tendance.",
+  },
+]);
+
+const carouselImages = ref([
+  { src: "/images/tie7.webp", alt: "Cravate Moderne" },
+  { src: "/images/tieX.webp", alt: "Cravate X" },
+  { src: "/images/tshirt2.webp", alt: "T-Shirt Classique" },
+]);
+
+// État pour la gestion du produit sélectionné
+const dialog = ref(false); // Contrôle l'affichage du modal
+const selectedProduct = ref(null);
+
+// Fonction pour afficher le détail d'un produit
+const viewProduct = (product) => {
+  selectedProduct.value = product; // Stocke le produit sélectionné
+  dialog.value = true; // Ouvre le modal
+};
+</script>
+
+<style scoped>
+.welcome-card {
+  margin-top: -30px;
+  margin-left: -198px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #a728cb, #b217a3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 800px;
+}
+
+.logo-img {
+  border-radius: 50%;
   margin: 20px auto;
 }
 
-.barre {
-  background-color: rgb(141, 28, 186);
-  color: white;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.brand-title {
+  font-size: 36px;
   font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
 }
 
-.boutons-fenetre {
-  display: flex;
-  gap: 10px;
+.subtitle {
+  font-size: 20px;
+  color: #ffffff;
+  font-style: italic;
+  margin-bottom: 15px;
 }
 
-.boutons-fenetre span {
-  cursor: pointer;
-  background-color: rgb(1, 205, 254);
-  color: rgb(0, 0, 0);
-  padding: 2px 8px;
-  border-radius: 4px;
+.brand-description {
+  font-size: 16px;
+  color: #ffffff;
+  line-height: 1.6;
+  margin: 20px 0;
 }
 
-.boutons-fenetre span:hover {
-  background-color: rgb(74, 217, 253);
+.carousel-image {
+  border-radius: 12px;
 }
 
-.contenu-fenetre {
-  padding: 20px;
-  background: url(/images/Fond-produits.png), url(/images/fond_3.png), no-repeat;
-  font-weight: 300;
+.product-gallery {
+  margin-top: 50px;
 }
 
-.logo-et-caroussel {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  background-color: rgb(141, 28, 186);
-  background: url(/images/Fond-produits.png), url(/images/fond_3.png),
-    rgb(141, 28, 186) no-repeat;
-  border: 2px solid black;
+.product-card {
+  transition: transform 0.2s ease-in-out;
+  border-radius: 12px;
 }
 
-#logo {
-  width: 20%;
-  height: auto;
+.product-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-.mySlides {
-  display: none;
-  border: 5px solid rgb(255, 113, 206);
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
-  transform: rotate(7deg);
-  margin-left: 60px;
-  margin-top: 60px;
+.product-image {
+  border-radius: 12px;
+  background: linear-gradient(180deg, #a728cb, #8f1aa2);
 }
 
-.caroussel img {
-  width: 70%;
-  height: auto;
+.v-row {
+  margin-top: 30px;
 }
 
-.contenu-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 20px;
-}
-
-.texte {
-  max-width: 60%;
-}
-
-.texte h2 {
-  margin: 0 0 10px;
-}
-
-.texte p {
-  margin: 0;
-}
-
-.photos-accueil {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 70px;
-}
-
-.photos-accueil img {
-  width: 20%;
-  height: auto;
-  border: 8px solid white;
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-  transition: transform 0.5s ease;
+.v-col {
   margin-bottom: 20px;
 }
 
-#premier-image-accueil {
-  transform: rotate(10deg);
-}
-
-#premier-image-accueil:hover {
-  transform: rotate(2deg);
-}
-
-#deuxieme-image-accueil {
-  transform: rotate(-5deg);
-}
-
-#deuxieme-image-accueil:hover {
-  transform: rotate(3deg);
-}
-
-#troisieme-image-accueil {
-  transform: rotate(7deg);
-}
-
-#troisieme-image-accueil:hover {
-  transform: rotate(1deg);
+.v-card-subtitle {
+  color: #555;
 }
 </style>

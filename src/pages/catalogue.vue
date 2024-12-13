@@ -7,7 +7,6 @@
       <v-card class="contenu-fenetre">
         <v-form @submit.prevent="filterProducts" class="form-catalogue">
           <v-row class="contenu-filtrage">
-            <!-- Filtre Type (Chemise/Cravate) -->
             <v-col cols="12" sm="6" md="4">
               <v-select
                 v-model="filters.type"
@@ -19,7 +18,6 @@
               ></v-select>
             </v-col>
 
-            <!-- Filtre Couleur -->
             <v-col cols="12" sm="6" md="4">
               <v-select
                 v-model="filters.couleur"
@@ -31,11 +29,20 @@
               ></v-select>
             </v-col>
 
-            <!-- Filtre Taille -->
             <v-col cols="12" sm="6" md="4">
               <v-select
                 v-model="filters.taille"
-                :items="tailles"
+                :items="[
+                  'Toutes',
+                  'Unique',
+                  '44',
+                  '46',
+                  '48',
+                  '50',
+                  '52',
+                  '54',
+                  '56',
+                ]"
                 style="width: 150px"
                 variant="solo"
                 label="Taille"
@@ -43,7 +50,6 @@
               ></v-select>
             </v-col>
 
-            <!-- Filtre Prix Minimum -->
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model.number="filters.prixMin"
@@ -55,7 +61,6 @@
               ></v-text-field>
             </v-col>
 
-            <!-- Filtre Prix Maximum -->
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model.number="filters.prixMax"
@@ -69,10 +74,9 @@
           </v-row>
         </v-form>
 
-        <!-- Liste des Produits -->
         <div class="product-container">
           <div v-if="filteredProducts.length === 0">Aucun produit trouvé.</div>
-          <v-row v-else>
+          <v-row>
             <v-col
               v-for="product in filteredProducts"
               :key="product.id"
@@ -82,10 +86,9 @@
             >
               <v-card
                 class="product-card"
-                @click="navigateToProductDetail(product.id)"
+                :href="`/product_detail/${product.id}`"
               >
                 <v-img
-                  v-if="product.image"
                   :src="product.image"
                   :alt="product.name"
                   class="product-image"
@@ -101,70 +104,68 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 
-export default {
-  data() {
-    return {
-      products: [], // Liste des produits récupérés
-      tailles: ["Toutes", "Unique", "44", "46", "48", "50", "52", "54", "56"], // Tailles disponibles
-      filters: {
-        type: "Tous", // Filtre Type
-        couleur: "Toutes", // Filtre Couleur
-        taille: "Toutes", // Filtre Taille
-        prixMin: null, // Filtre Prix Minimum
-        prixMax: null, // Filtre Prix Maximum
-      },
-    };
-  },
-  computed: {
-    filteredProducts() {
-      return this.products.filter((product) => {
-        const matchesType =
-          this.filters.type === "Tous" || product.type === this.filters.type;
-        const matchesCouleur =
-          this.filters.couleur === "Toutes" ||
-          product.couleur === this.filters.couleur;
-        const matchesTaille =
-          this.filters.taille === "Toutes" ||
-          product.taille === this.filters.taille;
-        const matchesPrixMin =
-          this.filters.prixMin === null || product.prix >= this.filters.prixMin;
-        const matchesPrixMax =
-          this.filters.prixMax === null || product.prix <= this.filters.prixMax;
-        return (
-          matchesType &&
-          matchesCouleur &&
-          matchesTaille &&
-          matchesPrixMin &&
-          matchesPrixMax
-        );
-      });
-    },
-  },
-  methods: {
-    async fetchProducts() {
-      try {
-        const response = await axios.get("/Labo03/api/produits");
-        this.products = response.data;
-        console.log("Produits récupérés :", this.products);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des produits :", error);
-      }
-    },
-    navigateToProductDetail(productId) {
-      // Navigation vers la page de détail du produit
-      this.$router.push({ name: "ProductDetail", params: { id: productId } });
-    },
-    filterProducts() {
-      console.log("Produits filtrés :", this.filteredProducts);
-    },
-  },
-  mounted() {
-    this.fetchProducts(); // Récupère la liste des produits à l'initialisation
-  },
+// Définition des filtres
+const filters = ref({
+  type: "Tous",
+  couleur: "Toutes",
+  taille: "Toutes",
+  prixMin: null,
+  prixMax: null,
+});
+
+// Liste des produits
+const products = ref([]);
+
+// Récupérer les produits depuis l'API
+const fetchProducts = async () => {
+  try {
+    const response = await axios.get("/Labo03/api/produits");
+    products.value = response.data;
+    console.log("Produits récupérés :", products.value);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des produits :", error);
+  }
 };
+
+// Filtrer les produits selon les critères sélectionnés
+const filteredProducts = computed(() => {
+  return products.value.filter((product) => {
+    const matchesType =
+      filters.value.type === "Tous" || product.type === filters.value.type;
+    const matchesCouleur =
+      filters.value.couleur === "Toutes" ||
+      product.couleur === filters.value.couleur;
+    const matchesTaille =
+      filters.value.taille === "Toutes" ||
+      product.taille === filters.value.taille;
+    const matchesPrixMin =
+      filters.value.prixMin === null || product.prix >= filters.value.prixMin;
+    const matchesPrixMax =
+      filters.value.prixMax === null || product.prix <= filters.value.prixMax;
+
+    return (
+      matchesType &&
+      matchesCouleur &&
+      matchesTaille &&
+      matchesPrixMin &&
+      matchesPrixMax
+    );
+  });
+});
+
+// Fonction appelée lors du filtrage
+const filterProducts = () => {
+  console.log("Produits filtrés :", filteredProducts.value);
+};
+
+// Appeler la récupération des produits lors du montage du composant
+onMounted(() => {
+  fetchProducts();
+});
 </script>
 
 <style scoped>

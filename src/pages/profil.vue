@@ -24,6 +24,20 @@
             <v-col cols="12">
               <p class="email-user">Email : {{ user.email }}</p>
             </v-col>
+            <v-col cols="12" class="options">
+              <v-btn color="primary" @click="editUser">Modifier</v-btn>
+              <v-btn color="red" @click="deleteUser">Supprimer</v-btn>
+            </v-col>
+          </v-row>
+        </v-container>
+        <v-container v-else-if="error" class="error-content">
+          <v-row>
+            <v-col cols="12">
+              <p class="error-message">Erreur : {{ error }}</p>
+              <v-btn color="primary" @click="retryFetchProfile">
+                Réessayer
+              </v-btn>
+            </v-col>
           </v-row>
         </v-container>
         <v-card-text v-else>
@@ -44,8 +58,10 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const user = ref(null);
+const error = ref(null);
 
 const fetchUserProfile = async () => {
+  error.value = null; // Réinitialise l'erreur
   try {
     const response = await fetch("/Labo03/api/user/profil", {
       method: "GET",
@@ -55,8 +71,13 @@ const fetchUserProfile = async () => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Erreur backend :", errorData.message);
+      let errorData = {};
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData.message = "Réponse inattendue du serveur.";
+      }
+      console.error("Erreur backend :", errorData.message || "Erreur inconnue");
       if (response.status === 401) {
         alert("Veuillez vous connecter pour accéder au profil.");
         router.push("/connexion");
@@ -70,11 +91,45 @@ const fetchUserProfile = async () => {
     if (data.success) {
       user.value = data.user;
     } else {
-      alert(data.message || "Erreur inconnue.");
+      throw new Error(data.message || "Erreur inconnue.");
     }
-  } catch (error) {
-    console.error("Erreur de chargement du profil :", error.message);
+  } catch (err) {
+    error.value = err.message || "Impossible de charger le profil.";
+    console.error("Erreur de chargement du profil :", err);
   }
+};
+
+const retryFetchProfile = () => {
+  fetchUserProfile();
+};
+
+const deleteUser = async () => {
+  if (confirm("Êtes-vous sûr de vouloir supprimer votre compte ?")) {
+    try {
+      const response = await fetch("/Labo03/api/user", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message || "Compte supprimé avec succès.");
+        router.push("/connexion");
+      } else {
+        alert(data.message || "Erreur lors de la suppression du compte.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression :", error);
+      alert("Une erreur est survenue.");
+    }
+  }
+};
+
+const editUser = () => {
+  router.push("/modification");
 };
 
 onMounted(() => {
@@ -102,12 +157,8 @@ onMounted(() => {
   margin-top: 10px;
 }
 
-.profil-image {
-  margin-top: 15px;
-  border-radius: 50%;
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border: 2px solid #000;
+.error-message {
+  color: red;
+  font-size: 18px;
 }
 </style>

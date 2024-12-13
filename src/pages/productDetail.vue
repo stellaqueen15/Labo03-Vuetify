@@ -11,7 +11,17 @@
         <p>{{ product.description }}</p>
         <p><strong>Prix :</strong> {{ product.prix }} €</p>
         <p><strong>Couleur :</strong> {{ product.couleur }}</p>
-        <p><strong>Taille :</strong> {{ product.taille }}</p>
+        <p>
+          <strong>Taille :</strong>
+          <v-select
+            v-model="selectedSize"
+            :items="availableSizes"
+            label="Sélectionner une taille"
+            item-text="taille"
+            item-value="taille"
+            outlined
+          ></v-select>
+        </p>
         <p><strong>Type :</strong> {{ product.type }}</p>
       </v-card-text>
       <v-card-actions class="boutons">
@@ -26,6 +36,7 @@
           color="#f8d2ff"
           @click="addToCart"
           class="add-to-cart"
+          :disabled="!selectedSize"
         >
           Ajouter au panier
         </v-btn>
@@ -38,54 +49,77 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from "vue";
 import { useAppStore } from "@/stores/app";
-import { useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 
-export default {
-  props: {
-    id: {
-      type: String,
-      required: true,
-    },
+// Récupération de l'ID du produit à partir des props
+const props = defineProps({
+  id: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      product: null,
-    };
+});
+
+// Déclaration des variables réactives
+const product = ref(null);
+const availableSizes = ref([]); // Liste des tailles disponibles
+const selectedSize = ref(null); // Taille sélectionnée par l'utilisateur
+
+// Récupération du store
+const store = useAppStore();
+
+// Récupération de l'ID du produit à partir de la route
+const route = useRoute();
+const productId = computed(() => props.id || route.params.id); // Utilisation de props ou route.params
+
+// Fonction pour récupérer les détails du produit
+const fetchProductDetails = async (productId) => {
+  try {
+    const response = await fetch(`/Labo03/api/produit/${productId}`);
+    const data = await response.json();
+    product.value = data;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des détails du produit :",
+      error
+    );
+    product.value = null;
+  }
+};
+
+// Fonction pour récupérer les tailles disponibles
+const fetchAvailableSizes = async (productId) => {
+  try {
+    const response = await fetch(`/Labo03/api/taille/${productId}`);
+    const sizes = await response.json();
+    availableSizes.value = sizes;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des tailles disponibles :",
+      error
+    );
+    availableSizes.value = [];
+  }
+};
+
+// Utilisation de watch pour récupérer les données dès le changement de l'ID
+watch(
+  productId,
+  async (newId) => {
+    await fetchProductDetails(newId);
+    await fetchAvailableSizes(newId);
   },
-  computed: {
-    store() {
-      return useAppStore();
-    },
-  },
-  watch: {
-    id: {
-      immediate: true,
-      handler(newId) {
-        this.fetchProductDetails(newId);
-      },
-    },
-  },
-  methods: {
-    async fetchProductDetails(productId) {
-      try {
-        const response = await fetch(`/Labo03/api/produit/${productId}`);
-        const data = await response.json();
-        this.product = data;
-      } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des détails du produit :",
-          error
-        );
-        this.product = null;
-      }
-    },
-    addToCart() {
-      this.store.addToCart(this.product);
-      alert("Produit ajouté au panier !");
-    },
-  },
+  { immediate: true }
+);
+
+// Méthode pour ajouter le produit au panier
+const addToCart = () => {
+  if (selectedSize.value) {
+    store.addToCart({ ...product.value, taille: selectedSize.value });
+    alert("Produit ajouté au panier !");
+  }
 };
 </script>
 

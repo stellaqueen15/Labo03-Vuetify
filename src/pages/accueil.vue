@@ -10,29 +10,53 @@
     </div>
     <div class="contenu-fenetre">
       <div class="logo-et-caroussel">
-        <img src="/images/logo_RichRicasso.png" alt="Logo Rich Ricasso" id="logo" />
+        <img
+          src="/images/logo_RichRicasso.png"
+          alt="Logo Rich Ricasso"
+          id="logo"
+        />
       </div>
       <main>
         <div class="contenu-main">
           <div class="texte">
             <h2>À propos de Rich Ricasso</h2>
             <p>
-              Rich Ricasso est une marque de luxe qui fusionne l'esthétique moderne et
-              l'élégance intemporelle. Explorez notre collection unique inspirée
-              par le style vaporwave.
+              Rich Ricasso est une marque de luxe qui fusionne l'esthétique
+              moderne et l'élégance intemporelle. Explorez notre collection
+              unique inspirée par le style vaporwave.
             </p>
           </div>
           <div class="caroussel">
             <img class="mySlides" src="/images/tie7.webp" alt="Image Tie 7" />
             <img class="mySlides" src="/images/tieX.webp" alt="Image Tie X" />
-            <img class="mySlides" src="/images/tshirt3.webp" alt="Image T-Shirt 3" />
-            <img class="mySlides" src="/images/tshirt2.webp" alt="Image T-Shirt 2" />
+            <img
+              class="mySlides"
+              src="/images/tshirt3.webp"
+              alt="Image T-Shirt 3"
+            />
+            <img
+              class="mySlides"
+              src="/images/tshirt2.webp"
+              alt="Image T-Shirt 2"
+            />
           </div>
         </div>
         <div class="photos-accueil">
-          <img src="/images/tshirt2.webp" alt="Premier Image Accueil" id="premier-image-accueil" />
-          <img src="/images/tie7.webp" alt="Deuxième Image Accueil" id="deuxieme-image-accueil" />
-          <img src="/images/tshirt6.webp" alt="Troisième Image Accueil" id="troisieme-image-accueil" />
+          <img
+            src="/images/tshirt2.webp"
+            alt="Premier Image Accueil"
+            id="premier-image-accueil"
+          />
+          <img
+            src="/images/tie7.webp"
+            alt="Deuxième Image Accueil"
+            id="deuxieme-image-accueil"
+          />
+          <img
+            src="/images/tshirt6.webp"
+            alt="Troisième Image Accueil"
+            id="troisieme-image-accueil"
+          />
         </div>
       </main>
     </div>
