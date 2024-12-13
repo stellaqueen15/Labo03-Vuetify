@@ -1,50 +1,3 @@
-<script>
-export default {
-  data() {
-    return {
-      name: "",
-      email: "",
-      password: "",
-    };
-  },
-  methods: {
-    handleSignup() {
-      fetch("/Labo03/api/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: this.name,
-          email: this.email,
-          password: this.password,
-        }),
-      })
-        .then((response) => {
-          console.log("Réponse du serveur:", response);
-          if (!response.ok) {
-            throw new Error(`Erreur HTTP: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log(data);
-          if (data.success) {
-            alert("Inscription réussie !");
-            this.$router.push("/connexion");
-          } else {
-            alert(data.message);
-          }
-        })
-        .catch((error) => {
-          console.error("Erreur lors de l'inscription:", error);
-          alert("Une erreur est survenue. Veuillez réessayer.");
-        });
-    },
-  },
-};
-</script>
-
 <template>
   <v-container class="signup-container">
     <v-row justify="center" align="center" class="signup-row pa-4">
@@ -91,6 +44,52 @@ export default {
     </v-row>
   </v-container>
 </template>
+
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const name = ref("");
+const email = ref("");
+const password = ref("");
+
+const router = useRouter();
+
+// Fonction d'inscription
+const handleSignup = () => {
+  fetch("/Labo03/api/user", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: name.value,
+      email: email.value,
+      password: password.value,
+    }),
+  })
+    .then((response) => {
+      console.log("Réponse du serveur:", response);
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data);
+      if (data.success) {
+        alert("Inscription réussie !");
+        router.push("/connexion");
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch((error) => {
+      console.error("Erreur lors de l'inscription:", error);
+      alert("Une erreur est survenue. Veuillez réessayer.");
+    });
+};
+</script>
 
 <style scoped>
 .signup-container {

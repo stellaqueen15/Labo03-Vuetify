@@ -113,25 +113,23 @@ const carouselImages = ref([
   { src: "/images/tshirt2.webp", alt: "T-Shirt Classique" },
 ]);
 
-// État pour la gestion du produit sélectionné
-const dialog = ref(false); // Contrôle l'affichage du modal
+const dialog = ref(false);
 const selectedProduct = ref(null);
 
-// Fonction pour afficher le détail d'un produit
 const viewProduct = (product) => {
-  selectedProduct.value = product; // Stocke le produit sélectionné
-  dialog.value = true; // Ouvre le modal
+  selectedProduct.value = product;
+  dialog.value = true;
 };
 </script>
 
 <style scoped>
 .welcome-card {
   margin-top: -30px;
-  margin-left: -198px;
+  margin-left: -190px;
   border-radius: 16px;
   background: linear-gradient(180deg, #a728cb, #b217a3);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  width: 800px;
+  width: 750px;
 }
 
 .logo-img {

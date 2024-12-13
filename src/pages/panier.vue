@@ -224,7 +224,6 @@ const validateCart = async () => {
   transform: translateY(2px);
 }
 
-/* Message si le panier est vide */
 .panier-empty {
   font-size: 1.2rem;
   color: #9e9e9e;

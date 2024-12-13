@@ -54,7 +54,6 @@ import { ref, computed, watch, onMounted } from "vue";
 import { useAppStore } from "@/stores/app";
 import { useRoute } from "vue-router";
 
-// Récupération de l'ID du produit à partir des props
 const props = defineProps({
   id: {
     type: String,
@@ -62,19 +61,15 @@ const props = defineProps({
   },
 });
 
-// Déclaration des variables réactives
 const product = ref(null);
-const availableSizes = ref([]); // Liste des tailles disponibles
-const selectedSize = ref(null); // Taille sélectionnée par l'utilisateur
+const availableSizes = ref([]);
+const selectedSize = ref(null);
 
-// Récupération du store
 const store = useAppStore();
 
-// Récupération de l'ID du produit à partir de la route
 const route = useRoute();
-const productId = computed(() => props.id || route.params.id); // Utilisation de props ou route.params
+const productId = computed(() => props.id || route.params.id);
 
-// Fonction pour récupérer les détails du produit
 const fetchProductDetails = async (productId) => {
   try {
     const response = await fetch(`/Labo03/api/produit/${productId}`);
@@ -89,7 +84,6 @@ const fetchProductDetails = async (productId) => {
   }
 };
 
-// Fonction pour récupérer les tailles disponibles
 const fetchAvailableSizes = async (productId) => {
   try {
     const response = await fetch(`/Labo03/api/taille/${productId}`);
@@ -104,7 +98,6 @@ const fetchAvailableSizes = async (productId) => {
   }
 };
 
-// Utilisation de watch pour récupérer les données dès le changement de l'ID
 watch(
   productId,
   async (newId) => {
@@ -114,7 +107,6 @@ watch(
   { immediate: true }
 );
 
-// Méthode pour ajouter le produit au panier
 const addToCart = () => {
   if (selectedSize.value) {
     store.addToCart({ ...product.value, taille: selectedSize.value });

@@ -5,10 +5,6 @@ import { useRouter } from "vue-router";
 const isLoggedIn = ref(false);
 const router = useRouter();
 
-const toggleDrawer = () => {
-  // Fonction pour activer/désactiver le menu
-};
-
 const logout = async () => {
   try {
     const response = await fetch("/Labo03/api/deconnexion", {
@@ -29,7 +25,6 @@ const logout = async () => {
   }
 };
 
-// Vérifier le statut de la connexion à l'initialisation
 onMounted(async () => {
   try {
     const response = await fetch("/Labo03/api/check-login", {
@@ -49,11 +44,6 @@ onMounted(async () => {
 
 <template>
   <v-toolbar color="indigo" elevate-on-scroll rounded class="menu">
-    <v-toolbar-side-icon
-      @click="toggleDrawer"
-      class="d-md-none"
-    ></v-toolbar-side-icon>
-
     <v-toolbar-title class="toolbar-title">Rich Ricasso</v-toolbar-title>
 
     <v-spacer></v-spacer>
@@ -91,7 +81,6 @@ onMounted(async () => {
   text-transform: uppercase;
 }
 
-/* Boutons de navigation */
 .nav-btn {
   font-size: 1rem;
   color: white;
@@ -106,7 +95,6 @@ onMounted(async () => {
   transform: translateY(-2px);
 }
 
-/* Bouton de déconnexion */
 .auth-btn {
   background-color: #ac2cc0;
   color: white;
@@ -122,30 +110,16 @@ onMounted(async () => {
   transform: translateY(-2px);
 }
 
-@media (max-width: 600px) {
-  .menu .v-btn {
-    font-size: 0.9rem;
-    margin: 0 8px;
-  }
-
-  .toolbar-title {
-    font-size: 1.5rem;
-  }
-}
-
-/* Style du menu hamburger */
 .menu .v-toolbar-side-icon {
   color: white;
   font-size: 2rem;
   padding: 10px;
 }
 
-/* Ajouter un effet de transition au toolbar pour smooth scroll */
 .v-toolbar {
   transition: all 0.3s ease;
 }
 
-/* Customisation du spacer pour garder un alignement propre */
 .menu .v-spacer {
   flex-grow: 1;
 }

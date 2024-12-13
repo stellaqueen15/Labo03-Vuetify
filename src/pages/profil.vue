@@ -3,16 +3,6 @@
     <v-card class="fenetre">
       <v-card-title class="barre">
         <span class="titre-fenetre">Fenêtre Profil</span>
-        <v-spacer></v-spacer>
-        <v-btn icon small class="moins">
-          <v-icon>-</v-icon>
-        </v-btn>
-        <v-btn icon small class="ouvrir">
-          <v-icon>[ ]</v-icon>
-        </v-btn>
-        <v-btn icon small class="fermer">
-          <v-icon>X</v-icon>
-        </v-btn>
       </v-card-title>
 
       <v-card-text class="contenu-profil">
@@ -25,8 +15,8 @@
               <p class="email-user">Email : {{ user.email }}</p>
             </v-col>
             <v-col cols="12" class="options">
-              <v-btn color="primary" @click="editUser">Modifier</v-btn>
-              <v-btn color="red" @click="deleteUser">Supprimer</v-btn>
+              <v-btn class="blue-btn" @click="editUser">Modifier</v-btn>
+              <v-btn class="blue-btn" @click="deleteUser">Supprimer</v-btn>
             </v-col>
           </v-row>
         </v-container>
@@ -61,7 +51,7 @@ const user = ref(null);
 const error = ref(null);
 
 const fetchUserProfile = async () => {
-  error.value = null; // Réinitialise l'erreur
+  error.value = null;
   try {
     const response = await fetch("/Labo03/api/user/profil", {
       method: "GET",
@@ -138,27 +128,131 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.fenetre {
+  max-width: 600px;
+  margin: 50px auto;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #a728cb, #b217a3);
+  color: white;
+}
+
+.barre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgb(141, 28, 186);
+  padding: 10px 20px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 16px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.titre-fenetre {
+  font-family: "Roboto", sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.v-btn {
+  color: white !important;
+}
+
+.v-btn.fermer {
+  color: #ff5757 !important;
+}
+
 .contenu-profil {
-  background: url(images/Fond-produits.png), url(images/fond_3.png);
-  background-position: center, 0px 0px;
-  height: 250px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(0, 0, 0, 0.1)
+  );
   text-align: center;
-  padding: 20px;
+  padding: 30px;
+  border-radius: 0 0 12px 12px;
+}
+
+.profil-content {
+  text-align: center;
 }
 
 .nom-user {
-  font-size: 30px;
-  font-weight: 500;
-  margin-top: 10px;
+  font-size: 26px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .email-user {
   font-size: 18px;
-  margin-top: 10px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  color: #f3e6f8;
+  margin-bottom: 20px;
+}
+
+.options {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.v-btn {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  border-radius: 8px;
+  transition: all 0.3s ease-in-out;
+}
+
+.v-btn.blue-btn {
+  background-color: #931eae;
+  color: white;
+}
+
+.v-btn.blue-btn:hover {
+  background-color: #9410b2;
+}
+
+.error-content {
+  text-align: center;
+  padding: 30px;
 }
 
 .error-message {
-  color: red;
+  color: #ff8080;
   font-size: 18px;
+  font-weight: bold;
+}
+
+.v-progress-circular {
+  margin: 20px auto;
+}
+
+@media (max-width: 600px) {
+  .fenetre {
+    margin: 20px;
+    max-width: 100%;
+  }
+
+  .contenu-profil {
+    padding: 20px;
+  }
+
+  .options {
+    flex-direction: column;
+  }
+
+  .v-btn {
+    width: 100%;
+  }
 }
 </style>

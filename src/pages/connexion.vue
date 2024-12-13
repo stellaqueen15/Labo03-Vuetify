@@ -1,64 +1,10 @@
-<script>
-export default {
-  data() {
-    return {
-      email: "",
-      password: "",
-    };
-  },
-  methods: {
-    handleLogin() {
-      fetch("/Labo03/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: this.email,
-          password: this.password,
-        }),
-      })
-        .then((response) => {
-          console.log("Réponse brute du serveur:", response);
-          if (!response.ok) {
-            throw new Error(`Erreur HTTP: ${response.status}`);
-          }
-          return response.text();
-        })
-        .then((data) => {
-          console.log("Données retournées:", data);
-          try {
-            const jsonData = JSON.parse(data);
-            console.log("Réponse JSON:", jsonData);
-            if (jsonData.success) {
-              alert("Connexion réussie !");
-              this.$router.push("/accueil");
-            } else {
-              alert(jsonData.message);
-            }
-          } catch (error) {
-            console.error("Erreur lors du parsing JSON:", error);
-            alert("Une erreur est survenue. Veuillez réessayer.");
-          }
-        })
-        .catch((error) => {
-          console.error("Erreur de connexion:", error);
-          alert("Une erreur est survenue. Veuillez réessayer.");
-        });
-    },
-  },
-};
-</script>
-
 <template>
   <v-container class="login-container">
     <v-row justify="center" align="center" class="login-row pa-4">
       <v-col cols="12" md="6">
-        <!-- Fenêtre de connexion -->
         <v-card class="login-card">
           <v-card-title class="login-title">Connexion</v-card-title>
 
-          <!-- Formulaire -->
           <v-form @submit.prevent="handleLogin" class="login-form">
             <v-text-field
               label="Email"
@@ -87,6 +33,56 @@ export default {
     </v-row>
   </v-container>
 </template>
+
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const email = ref("");
+const password = ref("");
+
+const router = useRouter();
+
+const handleLogin = () => {
+  fetch("/Labo03/api/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: email.value,
+      password: password.value,
+    }),
+  })
+    .then((response) => {
+      console.log("Réponse brute du serveur:", response);
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then((data) => {
+      console.log("Données retournées:", data);
+      try {
+        const jsonData = JSON.parse(data);
+        console.log("Réponse JSON:", jsonData);
+        if (jsonData.success) {
+          alert("Connexion réussie !");
+          router.push("/accueil");
+        } else {
+          alert(jsonData.message);
+        }
+      } catch (error) {
+        console.error("Erreur lors du parsing JSON:", error);
+        alert("Une erreur est survenue. Veuillez réessayer.");
+      }
+    })
+    .catch((error) => {
+      console.error("Erreur de connexion:", error);
+      alert("Une erreur est survenue. Veuillez réessayer.");
+    });
+};
+</script>
 
 <style scoped>
 .login-container {

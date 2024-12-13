@@ -30,27 +30,6 @@
             </v-col>
 
             <v-col cols="12" sm="6" md="4">
-              <v-select
-                v-model="filters.taille"
-                :items="[
-                  'Toutes',
-                  'Unique',
-                  '44',
-                  '46',
-                  '48',
-                  '50',
-                  '52',
-                  '54',
-                  '56',
-                ]"
-                style="width: 150px"
-                variant="solo"
-                label="Taille"
-                dense
-              ></v-select>
-            </v-col>
-
-            <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model.number="filters.prixMin"
                 variant="solo"
@@ -108,7 +87,6 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 
-// Définition des filtres
 const filters = ref({
   type: "Tous",
   couleur: "Toutes",
@@ -117,10 +95,8 @@ const filters = ref({
   prixMax: null,
 });
 
-// Liste des produits
 const products = ref([]);
 
-// Récupérer les produits depuis l'API
 const fetchProducts = async () => {
   try {
     const response = await axios.get("/Labo03/api/produits");
@@ -131,7 +107,6 @@ const fetchProducts = async () => {
   }
 };
 
-// Filtrer les produits selon les critères sélectionnés
 const filteredProducts = computed(() => {
   return products.value.filter((product) => {
     const matchesType =
@@ -157,12 +132,10 @@ const filteredProducts = computed(() => {
   });
 });
 
-// Fonction appelée lors du filtrage
 const filterProducts = () => {
   console.log("Produits filtrés :", filteredProducts.value);
 };
 
-// Appeler la récupération des produits lors du montage du composant
 onMounted(() => {
   fetchProducts();
 });
