@@ -28,6 +28,30 @@ if ($method == 'GET' && $uri == '/Labo03/api/check-login') {
     }
     exit();
 }
+// GET pour avoir les tailles des produits
+if ($method == 'GET' && preg_match('/^\/Labo03\/api\/taille\/(\d+)$/', $uri, $matches)) {
+    $productId = $matches[1];
+    header('Content-Type: application/json');
+
+    // Récupérer les tailles disponibles pour ce produit avec quantité > 0
+    $query = $database->prepare("
+        SELECT taille 
+        FROM quantites_par_taille 
+        WHERE produit_id = ? AND quantite > 0
+        ORDER BY taille
+    ");
+    $query->execute([$productId]);
+
+    $tailles = $query->fetchAll(PDO::FETCH_COLUMN); // Récupère uniquement les tailles
+
+    if ($tailles) {
+        echo json_encode($tailles);
+    } else {
+        echo json_encode([]);
+    }
+    exit();
+}
+
 
 //GET pour avoir les produits
 if ($method == 'GET' && $uri == '/Labo03/api/produits') {

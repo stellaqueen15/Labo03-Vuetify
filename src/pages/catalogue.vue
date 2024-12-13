@@ -7,6 +7,7 @@
       <v-card class="contenu-fenetre">
         <v-form @submit.prevent="filterProducts" class="form-catalogue">
           <v-row class="contenu-filtrage">
+            <!-- Filtre Type (Chemise/Cravate) -->
             <v-col cols="12" sm="6" md="4">
               <v-select
                 v-model="filters.type"
@@ -18,6 +19,7 @@
               ></v-select>
             </v-col>
 
+            <!-- Filtre Couleur -->
             <v-col cols="12" sm="6" md="4">
               <v-select
                 v-model="filters.couleur"
@@ -29,20 +31,11 @@
               ></v-select>
             </v-col>
 
+            <!-- Filtre Taille -->
             <v-col cols="12" sm="6" md="4">
               <v-select
                 v-model="filters.taille"
-                :items="[
-                  'Toutes',
-                  'Unique',
-                  '44',
-                  '46',
-                  '48',
-                  '50',
-                  '52',
-                  '54',
-                  '56',
-                ]"
+                :items="tailles"
                 style="width: 150px"
                 variant="solo"
                 label="Taille"
@@ -50,6 +43,7 @@
               ></v-select>
             </v-col>
 
+            <!-- Filtre Prix Minimum -->
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model.number="filters.prixMin"
@@ -61,6 +55,7 @@
               ></v-text-field>
             </v-col>
 
+            <!-- Filtre Prix Maximum -->
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                 v-model.number="filters.prixMax"
@@ -74,9 +69,10 @@
           </v-row>
         </v-form>
 
+        <!-- Liste des Produits -->
         <div class="product-container">
           <div v-if="filteredProducts.length === 0">Aucun produit trouvé.</div>
-          <v-row>
+          <v-row v-else>
             <v-col
               v-for="product in filteredProducts"
               :key="product.id"
@@ -86,9 +82,10 @@
             >
               <v-card
                 class="product-card"
-                :href="`/product_detail/${product.id}`"
+                @click="navigateToProductDetail(product.id)"
               >
                 <v-img
+                  v-if="product.image"
                   :src="product.image"
                   :alt="product.name"
                   class="product-image"
@@ -110,13 +107,14 @@ import axios from "axios";
 export default {
   data() {
     return {
-      products: [],
+      products: [], // Liste des produits récupérés
+      tailles: ["Toutes", "Unique", "44", "46", "48", "50", "52", "54", "56"], // Tailles disponibles
       filters: {
-        type: "Tous",
-        couleur: "Toutes",
-        taille: "Toutes",
-        prixMin: null,
-        prixMax: null,
+        type: "Tous", // Filtre Type
+        couleur: "Toutes", // Filtre Couleur
+        taille: "Toutes", // Filtre Taille
+        prixMin: null, // Filtre Prix Minimum
+        prixMax: null, // Filtre Prix Maximum
       },
     };
   },
@@ -155,12 +153,16 @@ export default {
         console.error("Erreur lors de la récupération des produits :", error);
       }
     },
+    navigateToProductDetail(productId) {
+      // Navigation vers la page de détail du produit
+      this.$router.push({ name: "ProductDetail", params: { id: productId } });
+    },
     filterProducts() {
       console.log("Produits filtrés :", this.filteredProducts);
     },
   },
   mounted() {
-    this.fetchProducts();
+    this.fetchProducts(); // Récupère la liste des produits à l'initialisation
   },
 };
 </script>
